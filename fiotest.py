@@ -5,6 +5,7 @@ import sys
 import configparser
 import tempfile
 import subprocess
+import itertools
 
 
 GLOBAL_CONFIG = {
@@ -36,9 +37,12 @@ _ERROR_INFO = ["number-errors", "first-error-code"]
 
 _FORMAT_STATUS = [
     ("io", _FORMAT_IO),
-    ("submission-latency-usec", _FORMAT_LATENCY),
-    ("completion-latency-usec", _FORMAT_LATENCY),
-    ("total-latency-usec", _FORMAT_LATENCY),
+    ("latency", get_format([
+        ("submission-usec", _FORMAT_LATENCY),
+        ("completion-usec", _FORMAT_LATENCY),
+        ("total-usec", _FORMAT_LATENCY),
+        ])
+    ),
     ("bandwidth", _FORMAT_BANDWIDTH),
 ]
 
@@ -129,12 +133,16 @@ class FioTest(object):
                 self.report(output.decode('utf-8'))
 
     def report(self, output):
-        print(output)
+        print("Finished")
         output_dict = dict(zip(FORMAT, output.split(";")))
         for k, v in output_dict.items():
             print("{0}:  {1}".format(k, v))
 
 
 if __name__ == "__main__":
-    test = FioTest("/dev/xvdg", "read", 10, 4, 1, 20)
-    test.run_test()
+    modes = ["randread", "randwrite"]
+    depths = [1, 4]
+    block_sizes = [16, 64,128]
+    for mode, depth, block_size in itertools.product(modes, depths, block_sizes):
+        test = FioTest("/dev/xvdg", mode=mode, file_size=10, block_size=block_size, io_depth=depth, runtime=20)
+        test.run_test()
