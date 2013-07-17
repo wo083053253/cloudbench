@@ -1,6 +1,5 @@
 #coding:utf-8
 import io
-import sys
 import os
 import configparser
 import subprocess
@@ -56,11 +55,8 @@ class FIOTest(object):
         """
         args = ["fio", "--minimal", "--warnings-fatal",config_file]
 
-        stream_in, stream_out = io.BytesIO(), io.BytesIO()
-
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = map(lambda s: s.decode("utf-8"), proc.communicate())
-
+        stdout, stderr = map(lambda s: s.decode("utf-8").strip('\n'), proc.communicate())
         ret_code = proc.returncode
 
         if ret_code != 0:
@@ -73,12 +69,12 @@ class FIOTest(object):
         print(output)
         output_dict = dict(zip(FORMAT, output.split(";")))
 
-        #if output_dict["general-version"] != "2":
-        #    raise Exception("Invalid output format!")
-        #if output_dict["general-error"] != "0":
-        #    raise Exception("An error occurred!")
+        if output_dict["general-terse-version"] != "3":
+            raise Exception("Invalid output format!")
+        if output_dict["general-error"] != "0":
+            raise Exception("An error occurred!")
 
-        for k, v in output_dict.items():
+        for k, v in sorted(output_dict.items()):
             print("{0}:  {1}".format(k, v))
 
     def run_test(self):

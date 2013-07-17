@@ -10,7 +10,7 @@ class FIOCallException(FIOException):
         self.stderr = stderr
 
     def __str__(self):
-        return "[{0}]:\n    {1}\n    {2}".format(self.code, self.stdout.strip(), self.stderr.strip())
+        return "[{0}]:\n    {1}\n    {2}".format(self.code, self.stdout, self.stderr)
 
 
 
