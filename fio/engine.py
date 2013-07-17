@@ -1,5 +1,4 @@
 #coding:utf-8
-import io
 import os
 import configparser
 import subprocess
@@ -65,8 +64,6 @@ class FIOTest(object):
         return stdout
 
     def report(self, output):
-        print("Finished")
-        print(output)
         output_dict = dict(zip(FORMAT, output.split(";")))
 
         if output_dict["general-terse-version"] != "3":
@@ -74,12 +71,12 @@ class FIOTest(object):
         if output_dict["general-error"] != "0":
             raise Exception("An error occurred!")
 
-        for k, v in sorted(output_dict.items()):
-            print("{0}:  {1}".format(k, v))
+        return output_dict
 
     def run_test(self):
         self.check_version()
         with tempfile.TemporaryDirectory() as temp_dir:
             config_path = self.generate_config(temp_dir)
             output = self.execute_fio(config_path)
-            self.report(output)
+
+        return self.report(output)
