@@ -1,7 +1,7 @@
 #coding:utf-8
 import requests
 
-from iobench.api.factory import make_list_method, make_create_method
+from iobench.api.factory import make_api_methods
 from iobench.api.util import path_join
 
 
@@ -19,10 +19,18 @@ class Client(object):
     def base_api_path(self):
         return path_join(self._api_path, self._api_version)
 
-    list_instances = make_list_method("instance")
 
-    list_measurements = make_list_method("measurement")
-    create_measurement = make_create_method("measurement")
+    create_instance, \
+    list_instances, \
+    get_instance, \
+    get_or_create_instance = make_api_methods("instance")
 
-    list_datapoints = make_list_method("datapoint")
-    create_datapoint = make_create_method("datapoint")
+    create_measurement, \
+    list_measurements, \
+    get_measurement, \
+    get_or_create_measurement = make_api_methods("measurement")
+
+    create_datapoint, \
+    list_datapoints, \
+    get_datapoint, \
+    get_or_create_datapoint = make_api_methods("datapoint")

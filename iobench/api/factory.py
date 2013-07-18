@@ -1,5 +1,6 @@
 #coding:utf-8
 import json
+from iobench.api.exceptions import NoSuchObject, MultipleObjectsReturned
 
 from iobench.api.util import _normalize_api_path, path_join
 
@@ -32,22 +33,36 @@ def _list_objects(session, api_host, api_path, filters, _extend_list=None):
     res = session.get(path_join(api_host, api_path), params=filters)
     res.raise_for_status()
     content = res.json()
-    _extend_list.extend(content.json()["objects"])
+    _extend_list.extend(content["objects"])
 
     return _list_objects(session, api_host, content["meta"]["next"], filters, _extend_list)
 
 
-def make_create_method(resource):
-    def api_method(self, **kwargs):
+def make_api_methods(resource):
+    normalized_resource_name = _normalize_api_path(resource)
+
+    def create_method(self, **kwargs):
         headers = {"Content-Type": "application/json"}
-        res = self._session.post(path_join(self.host, self.base_api_path, _normalize_api_path(resource)),
-                               headers=headers, data=json.dumps(kwargs))
+        res = self._session.post(path_join(self.host, self.base_api_path, normalized_resource_name),
+                                 headers=headers, data=json.dumps(kwargs))
         res.raise_for_status()
         return _get_by_url(self._session, res.headers["location"])
-    return api_method
 
+    def list_method(self, **filters):
+        return _list_objects(self._session, self.host, path_join(self.base_api_path, normalized_resource_name), filters)
 
-def make_list_method(resource):
-    def api_method(self, **filters):
-        return _list_objects(self._session, self.host, path_join(self.base_api_path, _normalize_api_path(resource)), filters)
-    return api_method
+    def get_method(self, **filters):
+        matches = list_method(self, **filters)
+        if not matches:
+            raise NoSuchObject()
+        if len(matches) > 1:
+            raise MultipleObjectsReturned()
+        return matches[0]
+
+    def get_or_create_method(self, **filters):
+        try:
+            return get_method(self, **filters)
+        except NoSuchObject:
+            return create_method(self, **filters)
+
+    return create_method, list_method, get_method, get_or_create_method
