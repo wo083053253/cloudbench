@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='iobench',
     version='0.1',
-    packages=['iobench', 'iobench.engine', 'iobench.api', 'iobench.test'],
+    packages=['iobench', 'iobench.engine', 'iobench.api', 'iobench.utils', 'iobench.test'],
     url='',
     license='',
     author='Thomas Orozco',
