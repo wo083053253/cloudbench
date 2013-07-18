@@ -20,17 +20,17 @@ class Client(object):
         return path_join(self._api_path, self._api_version)
 
 
-    create_instance, \
-    list_instances, \
-    get_instance, \
-    get_or_create_instance = make_api_methods("instance")
+    create_asset, \
+    list_assets, \
+    get_asset, \
+    get_or_create_asset = make_api_methods("asset")
+
+    create_configuration, \
+    list_configurations, \
+    get_configuration, \
+    get_or_create_configuration = make_api_methods("configuration")
 
     create_measurement, \
     list_measurements, \
     get_measurement, \
     get_or_create_measurement = make_api_methods("measurement")
-
-    create_datapoint, \
-    list_datapoints, \
-    get_datapoint, \
-    get_or_create_datapoint = make_api_methods("datapoint")
