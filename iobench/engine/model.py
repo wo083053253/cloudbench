@@ -1,6 +1,5 @@
 #coding:utf-8
 import os
-import configparser
 import subprocess
 import tempfile
 
@@ -9,12 +8,14 @@ from iobench.engine.output import FORMAT
 
 
 class FIOEngine(object):
-    _test_name = "iobench-test"
+    _test_name = "fio-test"
 
-    def __init__(self, config, fio_bin="iobench"):
+    def __init__(self, config, fio_bin="fio"):
         """
-        :param config: The configuration to use for this test (in FIO k,v format. Use None for no value)
-        :param fio_bin: Where to find the iobench binary
+        :param config: A FIO Config object to use for the tests
+        :type config: iobench.engine.config.FIOConfig
+        :param fio_bin: Where to find the fio binary
+        :type fio_bin: str
         """
         self.config = config
         self.fio_bin = fio_bin
@@ -26,22 +27,18 @@ class FIOEngine(object):
         """
         Generate the FIO config
         """
-        cnf = configparser.ConfigParser(allow_no_value=True)
-        cnf.add_section(self._test_name)
-        for k, v in self.config.items():
-            cnf.set(self._test_name, k, self.to_option(v))
+        config_path = os.path.join(temp_dir, "fio.ini")
 
-        config_path = os.path.join(temp_dir, "iobench.conf")
         with open(config_path, "w") as f:
-            cnf.write(f, space_around_delimiters=False)
+            f.write(self.config.to_ini())
 
         return config_path
 
     def check_version(self):
         """
-        Check that the version on FIO that is available is recent enough.
+        Check that the version of FIO that is available is recent enough.
         """
-        args = ["iobench", "-v"]
+        args = [self.fio_bin, "-v"]
         output = subprocess.check_output(args).decode('utf-8')
         _, version = output.split("-")
         major, minor, patch = map(int, version.split('.'))
@@ -52,7 +49,7 @@ class FIOEngine(object):
         """
         Execute the FIO run
         """
-        args = ["iobench", "--minimal", "--warnings-fatal",config_file]
+        args = [self.fio_bin, "--minimal", "--warnings-fatal",config_file]
 
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = map(lambda s: s.decode("utf-8").strip('\n'), proc.communicate())
@@ -64,14 +61,19 @@ class FIOEngine(object):
         return stdout
 
     def report(self, output):
-        output_dict = dict(zip(FORMAT, output.split(";")))
+        report = []
 
-        if output_dict["general-terse-version"] != "3":
-            raise Exception("Invalid output format!")
-        if output_dict["general-error"] != "0":
-            raise Exception("An error occurred!")
+        for conf, output in zip(self.config.jobs(), output.split("\n")):
+            output_dict = dict(zip(FORMAT, output.split(";")))
 
-        return output_dict
+            if output_dict["general-terse-version"] != "3":
+                raise Exception("Invalid output format!")
+            if output_dict["general-error"] != "0":
+                raise Exception("An error occurred!")
+
+            report.append((conf, output_dict))
+
+        return report
 
     def run_test(self):
         self.check_version()

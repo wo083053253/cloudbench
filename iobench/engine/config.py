@@ -41,7 +41,7 @@ class FIOConfig(object):
     def to_ini(self):
         # Generate the ini config
         # We have to use this stream because ConfigParser would not support duplicate sections
-        stream = io.BytesIO()
+        stream = io.StringIO()
 
         for name, conf in self._state:
             cnf = configparser.ConfigParser(allow_no_value=True)
@@ -49,7 +49,9 @@ class FIOConfig(object):
             for k, v in conf.items():
                 cnf.set(name, k, to_option(v))
             cnf.write(stream, False)
-            stream.write(b"\n\n")
 
         stream.seek(0)
         return stream.read()
+
+    def jobs(self):
+        return [conf for name, conf in self._state if name != "global"]
