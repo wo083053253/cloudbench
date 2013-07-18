@@ -32,7 +32,7 @@ _FORMAT_STATUS = [
 ]
 
 FORMAT = get_format([
-    ("general", ["terse-version", "fio-version", "jobname", "groupid", "error"]),
+    ("general", ["terse-version", "iobench-version", "jobname", "groupid", "error"]),
     ("read", get_format(_FORMAT_STATUS)),
     ("write", get_format(_FORMAT_STATUS)),
     ("cpu", _FORMAT_CPU),

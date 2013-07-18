@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='fio',
+    name='iobench',
     version='0.1',
-    packages=['fio', 'fio.api', 'fio.test'],
+    packages=['iobench', 'iobench.engine', 'iobench.api', 'iobench.test'],
     url='',
     license='',
     author='Thomas Orozco',

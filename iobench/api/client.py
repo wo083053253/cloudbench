@@ -1,8 +1,8 @@
 #coding:utf-8
 import requests
 
-from fio.api.factory import make_list_method, make_create_method
-from fio.api.util import path_join
+from iobench.api.factory import make_list_method, make_create_method
+from iobench.api.util import path_join
 
 
 class Client(object):

@@ -1,5 +1,5 @@
 #coding:utf-8
-from fio.exceptions import FIOInvalidConfigValue
+from iobench.engine.exceptions import FIOInvalidConfigValue
 
 MULTIPLIERS = ["k", "M", "G", "T", "P"]
 UNITS = []

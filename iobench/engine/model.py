@@ -4,17 +4,17 @@ import configparser
 import subprocess
 import tempfile
 
-from fio.exceptions import FIOInvalidVersion, FIOCallException
-from fio.output import FORMAT
+from iobench.engine.exceptions import FIOInvalidVersion, FIOCallException
+from iobench.engine.output import FORMAT
 
 
-class FIOTest(object):
-    _test_name = "fio-test"
+class FIOEngine(object):
+    _test_name = "iobench-test"
 
-    def __init__(self, config, fio_bin="fio"):
+    def __init__(self, config, fio_bin="iobench"):
         """
         :param config: The configuration to use for this test (in FIO k,v format. Use None for no value)
-        :param fio_bin: Where to find the fio binary
+        :param fio_bin: Where to find the iobench binary
         """
         self.config = config
         self.fio_bin = fio_bin
@@ -31,7 +31,7 @@ class FIOTest(object):
         for k, v in self.config.items():
             cnf.set(self._test_name, k, self.to_option(v))
 
-        config_path = os.path.join(temp_dir, "fio.conf")
+        config_path = os.path.join(temp_dir, "iobench.conf")
         with open(config_path, "w") as f:
             cnf.write(f, space_around_delimiters=False)
 
@@ -41,7 +41,7 @@ class FIOTest(object):
         """
         Check that the version on FIO that is available is recent enough.
         """
-        args = ["fio", "-v"]
+        args = ["iobench", "-v"]
         output = subprocess.check_output(args).decode('utf-8')
         _, version = output.split("-")
         major, minor, patch = map(int, version.split('.'))
@@ -52,7 +52,7 @@ class FIOTest(object):
         """
         Execute the FIO run
         """
-        args = ["fio", "--minimal", "--warnings-fatal",config_file]
+        args = ["iobench", "--minimal", "--warnings-fatal",config_file]
 
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = map(lambda s: s.decode("utf-8").strip('\n'), proc.communicate())
