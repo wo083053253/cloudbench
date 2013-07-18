@@ -5,6 +5,7 @@ from iobench.api.util import _normalize_api_path, path_join
 
 API_ONLY_KW = ["limit", "offset"]
 
+
 def _get_by_url(session, url):
     res = session.get(url)
     res.raise_for_status()
