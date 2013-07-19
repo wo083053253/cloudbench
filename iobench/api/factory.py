@@ -1,8 +1,6 @@
 #coding:utf-8
-import json
-from iobench.api.exceptions import NoSuchObject, MultipleObjectsReturned
 
-from iobench.api.util import _normalize_api_path, path_join
+from iobench.api.util import path_join
 
 API_ONLY_KW = ["limit", "offset"]
 
@@ -11,6 +9,19 @@ def _get_by_url(session, url):
     res = session.get(url)
     res.raise_for_status()
     return res.json()
+
+
+def _clean_related_filters(filters):
+    """
+    :param filters: Filters that we want to search (and fix) for related objects
+    :type filters: dict
+    """
+    for key, value in list(filters.items()):  # I don't want a view here
+        if type(value) == dict:  #TODO: Need to wrap those into API objects
+            rel_id = value.get("id")
+            filters[key] = rel_id
+            assert rel_id is not None, "You can't filter using dicts, except for API objects."
+    return filters
 
 
 def _list_objects(session, api_host, api_path, filters, _extend_list=None):
@@ -30,6 +41,8 @@ def _list_objects(session, api_host, api_path, filters, _extend_list=None):
     for kw in API_ONLY_KW:
         assert kw not in filters, "You can't use the {0} pagination keyword".format(kw) #TODO: Accept on the first hit
 
+    filters = _clean_related_filters(filters)
+
     res = session.get(path_join(api_host, api_path), params=filters)
     res.raise_for_status()
     content = res.json()
@@ -37,32 +50,3 @@ def _list_objects(session, api_host, api_path, filters, _extend_list=None):
 
     return _list_objects(session, api_host, content["meta"]["next"], filters, _extend_list)
 
-
-def make_api_methods(resource):
-    normalized_resource_name = _normalize_api_path(resource)
-
-    def create_method(self, **kwargs):
-        headers = {"Content-Type": "application/json"}
-        res = self._session.post(path_join(self.host, self.base_api_path, normalized_resource_name),
-                                 headers=headers, data=json.dumps(kwargs))
-        res.raise_for_status()
-        return _get_by_url(self._session, res.headers["location"])
-
-    def list_method(self, **filters):
-        return _list_objects(self._session, self.host, path_join(self.base_api_path, normalized_resource_name), filters)
-
-    def get_method(self, **filters):
-        matches = list_method(self, **filters)
-        if not matches:
-            raise NoSuchObject()
-        if len(matches) > 1:
-            raise MultipleObjectsReturned()
-        return matches[0]
-
-    def get_or_create_method(self, **filters):
-        try:
-            return get_method(self, **filters)
-        except NoSuchObject:
-            return create_method(self, **filters)
-
-    return create_method, list_method, get_method, get_or_create_method
