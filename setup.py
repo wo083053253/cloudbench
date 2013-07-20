@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='iobench',
+    name='stackbench',
     version='0.1',
-    packages=['iobench', 'iobench.engine', 'iobench.api', 'iobench.utils', 'iobench.test'],
+    packages=['stackbench', 'stackbench.engine', 'stackbench.api', 'stackbench.utils', 'stackbench.test'],
     url='',
     license='',
     author='Thomas Orozco',

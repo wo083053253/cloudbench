@@ -1,6 +1,6 @@
 #coding:utf-8
 
-from iobench.api.util import path_join
+from stackbench.api.util import path_join
 
 API_ONLY_KW = ["limit", "offset"]
 

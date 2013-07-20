@@ -1,10 +1,10 @@
 #coding:utf-8
 import json
 import requests
-from iobench.api.exceptions import NoSuchObject, MultipleObjectsReturned
+from stackbench.api.exceptions import NoSuchObject, MultipleObjectsReturned
 
-from iobench.api.factory import _get_by_url, _list_objects
-from iobench.api.util import path_join, _normalize_api_path
+from stackbench.api.factory import _get_by_url, _list_objects
+from stackbench.api.util import path_join, _normalize_api_path
 
 
 #TODO Decorate errors as APIErrors

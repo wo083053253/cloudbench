@@ -2,7 +2,7 @@
 import configparser
 import io
 
-from iobench.engine.exceptions import FIOInvalidConfigValue
+from stackbench.engine.exceptions import FIOInvalidConfigValue
 
 
 MULTIPLIERS = ["k", "M", "G", "T", "P"]
