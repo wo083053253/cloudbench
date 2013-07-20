@@ -3,8 +3,8 @@ import os
 import subprocess
 import tempfile
 
-from stackbench.engine.exceptions import FIOInvalidVersion, FIOCallException
-from stackbench.engine.output import FORMAT
+from stackbench.fio.exceptions import FIOInvalidVersion, FIOCallException
+from stackbench.fio.output import FORMAT
 
 
 class FIOEngine(object):
@@ -13,7 +13,7 @@ class FIOEngine(object):
     def __init__(self, config, fio_bin="fio"):
         """
         :param config: A FIO Config object to use for the tests
-        :type config: stackbench.engine.config.FIOConfig
+        :type config: stackbench.fio.config.FIOConfig
         :param fio_bin: Where to find the fio binary
         :type fio_bin: str
         """

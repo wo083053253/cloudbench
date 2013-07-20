@@ -1,7 +1,7 @@
 #coding:utf-8
 import unittest
 
-from stackbench.engine.output import FORMAT
+from stackbench.fio.output import FORMAT
 
 
 class OutputParserTestCase(unittest.TestCase):

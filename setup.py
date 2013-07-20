@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='stackbench',
     version='0.1',
-    packages=['stackbench', 'stackbench.engine', 'stackbench.api', 'stackbench.utils', 'stackbench.test'],
+    packages=['stackbench', 'stackbench.fio', 'stackbench.api', 'stackbench.utils', 'stackbench.test'],
     url='',
     license='',
     author='Thomas Orozco',
