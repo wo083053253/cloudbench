@@ -3,7 +3,7 @@ import os
 import subprocess
 import tempfile
 
-from stackbench.fio.exceptions import FIOInvalidVersion, FIOCallException
+from stackbench.fio.exceptions import FIOInvalidVersion, FIOCallError, FIOError
 from stackbench.fio.output import FORMAT
 
 
@@ -13,7 +13,7 @@ class FIOEngine(object):
     def __init__(self, config, fio_bin="fio"):
         """
         :param config: A FIO Config object to use for the tests
-        :type config: stackbench.fio.config.FIOConfig
+        :type config: stackbench.fio.config.ConfigInterface
         :param fio_bin: Where to find the fio binary
         :type fio_bin: str
         """
@@ -56,22 +56,23 @@ class FIOEngine(object):
         ret_code = proc.returncode
 
         if ret_code != 0:
-            raise FIOCallException(ret_code, stdout, stderr)
+            raise FIOCallError(ret_code, stdout, stderr)
 
         return stdout
 
-    def report(self, output):
+    def report(self, fio_output):
         report = []
 
-        for conf, output in zip(self.config.jobs(), output.split("\n")):
-            output_dict = dict(zip(FORMAT, output.split(";")))
+        for reporting_group in fio_output.split("\n"):
 
-            if output_dict["general-terse-version"] != "3":
-                raise Exception("Invalid output format!")
-            if output_dict["general-error"] != "0":
-                raise Exception("An error occurred!")
+            d = dict(zip(FORMAT, reporting_group.split(";")))
 
-            report.append((conf, output_dict))
+            if d["general-terse-version"] != "3":
+                raise FIOError("Invalid output format!")
+            if d["general-error"] != "0":
+                raise FIOError("An error occurred!")
+
+            report.append(d)
 
         return report
 

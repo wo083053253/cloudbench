@@ -1,10 +1,10 @@
 #coding:utf-8
 
-class FIOException(Exception):
+class FIOError(Exception):
     pass
 
 
-class FIOCallException(FIOException):
+class FIOCallError(FIOError):
     def __init__(self, code, stdout, stderr):
         self.code = code
         self.stdout = stdout
@@ -14,9 +14,9 @@ class FIOCallException(FIOException):
         return "[{0}]:\n    {1}\n    {2}".format(self.code, self.stdout, self.stderr)
 
 
-class FIOInvalidVersion(FIOException):
+class FIOInvalidVersion(FIOError):
     pass
 
 
-class FIOInvalidConfigValue(FIOException):
+class FIOInvalidJob(FIOError):
     pass
