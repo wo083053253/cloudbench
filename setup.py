@@ -12,7 +12,7 @@ setup(
     author='Thomas Orozco',
     author_email='thomas@scalr.com',
     description='FIO Wrapper',
-    install_requires=['requests',],
+    install_requires=['requests', 'six'],
     setup_requires=["nose"],
     tests_require=["tox", "nose"],
 )

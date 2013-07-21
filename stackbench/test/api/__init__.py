@@ -1,7 +1,12 @@
 #coding:utf-8
+import six
+from six.moves import http_client
 import json
-from urllib.parse import urlparse, parse_qsl
-from email.message import Message
+
+if six.PY3:
+    from urllib.parse import urlparse, parse_qsl
+else:
+    from urlparse import urlparse, parse_qsl
 
 from requests import Response
 
@@ -9,7 +14,7 @@ from requests import Response
 TEST_ENDPOINT = "http://example.com"
 
 
-class BaseTestAdapter():
+class BaseTestAdapter(object):
     def __init__(self):
         self.requests = []
 
@@ -29,15 +34,16 @@ class BaseTestAdapter():
 class PredictableTestAdapter(BaseTestAdapter):
     def __init__(self, responses):
         self.responses = responses
-        super().__init__()
+        super(PredictableTestAdapter, self).__init__()
 
     def _send(self, request, *args, **kwargs):
         return self.responses.pop(0)
 
+
 class RepeatingTestAdapter(BaseTestAdapter):
     def __init__(self, response):
         self.response = response
-        super().__init__()
+        super(RepeatingTestAdapter, self).__init__()
 
     def _send(self, request, *args, **kwargs):
         return self.response
@@ -51,7 +57,26 @@ def _add_http_client_response(response):
     class O():
         pass
 
-    msg = Message()
+    class HeaderMessage(dict):
+        """
+        We have to create a dummy message object because requests want to have a look at it.
+        This is only used for cookielib, so, since we don't care about cookies here, we just return nothing.
+        """
+        def __init__(self):
+            self.type = response.headers.get("content-type", "text/plain")
+            self.maintype, self.subtype = self.type.split("/", 1)
+            super(HeaderMessage, self).__init__()
+
+        def getheaders(self, *args, **kwargs):
+            # Python 2.x
+            return []
+
+        def get_all(self, *args, **kwargs):
+            return []
+            # Python 3.x
+
+
+    msg = HeaderMessage()
     for k, v in response.headers.items():
         msg[k] = v
 

@@ -1,6 +1,7 @@
 #coding:utf-8
 import io
-import configparser
+from six.moves import configparser
+import six
 
 from stackbench.fio.config import DEFAULT_MODE, READ_MODES, WRITE_MODES, DEFAULT_BLOCK_SIZE, DEFAULT_IO_DEPTH, ConfigInterface
 
@@ -91,13 +92,18 @@ class Job(ConfigInterface):
         :rtype: str
         """
 
-        stream = io.StringIO()
+        stream = six.StringIO()
 
         cnf = configparser.ConfigParser(allow_no_value=True)
         cnf.add_section(self.name)
         for k, v in self._job_config.items():
             cnf.set(self.name, k, to_option(v))
 
-        cnf.write(stream, False)
-        stream.seek(0)
-        return stream.read()
+        if six.PY3:
+            cnf.write(stream, space_around_delimiters=False)
+            stream.seek(0)
+            return stream.read()
+        else:
+            cnf.write(stream)
+            stream.seek(0)
+            return stream.read().replace(" = ", "=")

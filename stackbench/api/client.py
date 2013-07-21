@@ -25,7 +25,7 @@ def api_wrapper(method):
                 logging.error("An API call failed")
                 logging.error("%s %s", response.status_code, response.reason)
                 logging.error(e.response.text)
-            raise APIError(response) from e
+            raise APIError(response)
     return wrapper
 
 

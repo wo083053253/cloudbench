@@ -31,22 +31,28 @@ class FIOEngine(object):
 
         return config_path
 
+    def _get_check_version_args(self):
+        return [self.fio_bin, "-v"]
+
     def check_version(self):
         """
         Check that the version of FIO that is available is recent enough.
         """
-        args = [self.fio_bin, "-v"]
-        output = subprocess.check_output(args).decode('utf-8')
+        args = self._get_check_version_args()
+        output = subprocess.check_output(args).decode('utf-8')  #TODO: Versions?
         _, version = output.split("-")
         major, minor, patch = map(int, version.split('.'))
         if major < 2:
             raise FIOInvalidVersion()
 
+    def _get_execute_fio_args(self, config_file):
+        return [self.fio_bin, "--minimal", "--warnings-fatal", config_file]
+
     def execute_fio(self, config_file):
         """
         Execute the FIO run
         """
-        args = [self.fio_bin, "--minimal", "--warnings-fatal",config_file]
+        args = self._get_execute_fio_args(config_file)
 
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = map(lambda s: s.decode("utf-8").strip('\n'), proc.communicate())

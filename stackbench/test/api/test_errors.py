@@ -28,6 +28,5 @@ class ErrorTestCase(unittest.TestCase):
             self.assertIsNotNone(e.response)
             self.assertEqual(500, e.response.status_code)
             self.assertEqual("INTERNAL SERVER ERROR", e.response.reason)
-            self.assertIsNotNone(e.__cause__)
         else:
             self.fail("No APIError was raised")
