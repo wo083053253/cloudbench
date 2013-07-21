@@ -66,10 +66,12 @@ def _add_http_client_response(response):
 
 def make_json_response(data, status_code=200, headers=None):
     """
-
     :type data: dict
     :type status_code: int
     :type headers: dict
+
+    :returns: A Response object with the corresponding JSON body
+    :rtype: requests.models.Response
     """
     if headers is None:
         headers = {}
@@ -87,9 +89,9 @@ def make_json_response(data, status_code=200, headers=None):
 
 def extract_qs(url):
     """
-
-    :param url:
-    :return:
+    :type url: str
+    :returns: The querystring mapping
+    :rtype: dict
     """
     p = urlparse(url)
     res = parse_qsl(p.query)

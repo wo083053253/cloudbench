@@ -5,6 +5,7 @@ import unittest
 from requests import Response
 
 from stackbench.api.client import Client
+from stackbench.api.util import path_join
 
 from stackbench.test.api import TEST_ENDPOINT, PredictableTestAdapter, make_json_response
 
@@ -18,7 +19,7 @@ OBJ_RESPONSE = {
 class APICreateTestCase(unittest.TestCase):
     def setUp(self):
         self.client = Client(TEST_ENDPOINT)  # We'll never hit that anyway
-        test_loc = TEST_ENDPOINT + "/created/loc/1"
+        test_loc = path_join(TEST_ENDPOINT, "/created/loc/1")
         created = Response()
         created.status_code = 201
         created.headers["location"] =  test_loc
