@@ -1,10 +1,30 @@
 #coding:utf-8
-import json
-import requests
-from stackbench.api.exceptions import NoSuchObject, MultipleObjectsReturned
+import logging
+from functools import wraps
 
-from stackbench.api.factory import _get_by_url, _list_objects
+import requests
+from requests.packages.urllib3.exceptions import HTTPError
+
+from stackbench.api.exceptions import NoSuchObject, MultipleObjectsReturned, APIError
+from stackbench.api.factory import _get_by_url, _list_objects, _create_object
 from stackbench.api.util import path_join, _normalize_api_path
+
+
+logger = logging.getLogger(__name__)
+
+
+def api_wrapper(method):
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return method(self, *args, **kwargs)
+        except HTTPError as e:
+            if hasattr(e, "response"):
+                logging.error("An API call failed")
+                logging.error("%s %s", e.response.status_code, e.response.reason)
+                logging.error(e.response.text)
+            raise APIError from e
+    return wrapper
 
 
 #TODO Decorate errors as APIErrors
@@ -13,16 +33,20 @@ class ResourceHandler(object):
         self.client = client
         self.resource =   _normalize_api_path(resource)
 
+    @api_wrapper
     def create(self, **kwargs):
-        headers = {"Content-Type": "application/json"}
-        res = self.client._session.post(path_join(self.client.host, self.client.base_api_path, self.resource),
-                                 headers=headers, data=json.dumps(kwargs))
-        res.raise_for_status()
-        return _get_by_url(self.client._session, res.headers["location"])
+        logger.debug("CREATE: %s", self.resource)
+        location = _create_object(self.client._session, self.client.host,
+                                  path_join(self.client.base_api_path, self.resource), kwargs)
+        return _get_by_url(self.client._session, location)
 
+    @api_wrapper
     def list(self, **filters):
-        return _list_objects(self.client._session, self.client.host, path_join(self.client.base_api_path, self.resource), filters)
+        logger.debug("LIST: %s", self.resource)
+        return _list_objects(self.client._session, self.client.host,
+                             path_join(self.client.base_api_path, self.resource), filters)
 
+    @api_wrapper
     def get(self, **filters):
         matches = self.list(**filters)
         if not matches:
@@ -30,8 +54,10 @@ class ResourceHandler(object):
         if len(matches) > 1:
             raise MultipleObjectsReturned()
         # The API might return different results for a get and a list - we'll be safe and waste an API call here
+        logger.debug("GET: %s", self.resource)
         return _get_by_url(self.client._session, path_join(self.client.host, matches.pop()["resource_uri"]))
 
+    @api_wrapper
     def get_or_create(self, **filters):
         try:
             return self.get(**filters)
@@ -46,7 +72,7 @@ class Client(object):
     def __init__(self, host, auth=None):
         self.host = host
         self._session = requests.Session()
-        self._session.headers = {"Accept": "application/json"}
+        self._session.headers = {"accept": "application/json"}
         self._session.auth = auth
 
         self.providers = ResourceHandler(self, "provider")

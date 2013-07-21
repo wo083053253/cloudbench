@@ -1,4 +1,5 @@
 #coding:utf-8
+import json
 
 from stackbench.api.util import path_join
 
@@ -9,6 +10,22 @@ def _get_by_url(session, url):
     res = session.get(url)
     res.raise_for_status()
     return res.json()
+
+
+def _create_object(session, api_host, resource_path, kwargs):
+    """
+    Create a new object in the API
+
+    :param session: A session object to use to make the request
+    :param api_host: The host where the API is located
+    :param resource_path: The path where the objects are created
+    :param resource: The resource to create
+    :param kwargs: The arguments to use to create the object
+    """
+    headers = {"Content-Type": "application/json"}
+    res = session.post(path_join(api_host, resource_path), headers=headers, data=json.dumps(kwargs))
+    res.raise_for_status()
+    return res.headers["location"]
 
 
 def _clean_related_filters(filters):
@@ -24,18 +41,18 @@ def _clean_related_filters(filters):
     return filters
 
 
-def _list_objects(session, api_host, api_path, filters, _extend_list=None):
+def _list_objects(session, api_host, resource_path, filters, _extend_list=None):
     """
     :param session: A session object to use to make the request
     :param api_host: The host where the API is located
-    :param api_path: The path where the objects are listed
+    :param resource_path: The path where the objects are listed
     :param filters: Filters to apply to the request
     :return: The list of objects that are retrieved at  this endpoint
     :rtype: list
     """
     _extend_list = _extend_list if _extend_list is not None else []
 
-    if api_path is None:
+    if resource_path is None:
         return _extend_list
 
     for kw in API_ONLY_KW:
@@ -43,7 +60,7 @@ def _list_objects(session, api_host, api_path, filters, _extend_list=None):
 
     filters = _clean_related_filters(filters)
 
-    res = session.get(path_join(api_host, api_path), params=filters)
+    res = session.get(path_join(api_host, resource_path), params=filters)
     res.raise_for_status()
     content = res.json()
     _extend_list.extend(content["objects"])
