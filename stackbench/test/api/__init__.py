@@ -6,7 +6,7 @@ from email.message import Message
 from requests import Response
 
 
-TEST_ENDPOINT = "test://example.com"
+TEST_ENDPOINT = "http://example.com"
 
 
 class BaseTestAdapter():
