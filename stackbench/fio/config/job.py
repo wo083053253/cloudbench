@@ -72,7 +72,12 @@ class Job(ConfigInterface):
 
     @property
     def block_size(self):
-        return self._job_config.get("blocksize", DEFAULT_BLOCK_SIZE)
+        for param in ["bs", "blocksize"]:
+            out = self._job_config.get(param, None)
+            if out is not None:
+                return out
+        return DEFAULT_BLOCK_SIZE
+
 
     @property
     def io_depth(self):

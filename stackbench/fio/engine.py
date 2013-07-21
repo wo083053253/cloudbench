@@ -20,9 +20,6 @@ class FIOEngine(object):
         self.config = config
         self.fio_bin = fio_bin
 
-    def to_option(self, value):
-        return str(value) if value is not None else None
-
     def generate_config(self, temp_dir):
         """
         Generate the FIO config
