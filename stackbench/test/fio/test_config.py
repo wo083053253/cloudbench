@@ -47,6 +47,21 @@ class JobTestCase(unittest.TestCase):
         j.name = "my-job"
         self.assertEqual("[my-job]\nbs=8k\niodepth=2\nstonewall", j.to_ini().strip())
 
+    def test_addition(self):
+        """
+        Test that when adding jobs, we
+          - Create an anonymous job
+          - Prioritize the right operand
+        """
+        j0 = Job({"bs": "4k", "iodepth": "4"}, "global")
+        j1 = Job({"bs": "8k", "rw": "read"}, "job")
+
+        j2 = j0 + j1
+
+        self.assertEqual("anonymous", j2.name)
+        self.assertEqual("read", j2.mode)
+        self.assertEqual("8k", j2.block_size)
+        self.assertEqual("4", j2.io_depth)
 
 class CompositeConfigTestCase(unittest.TestCase):
     def test_ini(self):
