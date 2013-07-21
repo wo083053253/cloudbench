@@ -3,7 +3,7 @@ import logging
 from functools import wraps
 
 import requests
-from requests.packages.urllib3.exceptions import HTTPError
+from requests.exceptions import HTTPError
 
 from stackbench.api.exceptions import NoSuchObject, MultipleObjectsReturned, APIError
 from stackbench.api.factory import _get_by_url, _list_objects, _create_object
@@ -19,15 +19,16 @@ def api_wrapper(method):
         try:
             return method(self, *args, **kwargs)
         except HTTPError as e:
+            response = None
             if hasattr(e, "response"):
+                response = e.response
                 logging.error("An API call failed")
-                logging.error("%s %s", e.response.status_code, e.response.reason)
+                logging.error("%s %s", response.status_code, response.reason)
                 logging.error(e.response.text)
-            raise APIError from e
+            raise APIError(response) from e
     return wrapper
 
 
-#TODO Decorate errors as APIErrors
 class ResourceHandler(object):
     def __init__(self, client, resource):
         self.client = client

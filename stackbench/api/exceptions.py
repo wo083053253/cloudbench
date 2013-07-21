@@ -1,7 +1,8 @@
 #coding:utf-8
 
 class APIError(Exception):
-    pass
+    def __init__(self, response=None):
+        self.response = response
 
 class NoSuchObject(APIError):
     pass
