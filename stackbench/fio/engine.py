@@ -58,6 +58,13 @@ class FIOEngine(object):
         return stdout
 
     def report(self, fio_output):
+        """
+        :param fio_output:
+        :type fio_output: str
+        :returns: A list of reports (dicts), one per reporting group
+        :rtype: list of dict
+        :raises: FIOError
+        """
         report = []
 
         for reporting_group in fio_output.split("\n"):
