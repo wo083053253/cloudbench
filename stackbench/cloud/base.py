@@ -1,5 +1,13 @@
 #coding:utf-8
 class BaseCloud(object):
+    def __init__(self, session):
+        """
+        :param session:
+        :type session: requests.sessions.Session
+        """
+        self.session = session
+
+
     @property
     def metadata_server(self):
         """

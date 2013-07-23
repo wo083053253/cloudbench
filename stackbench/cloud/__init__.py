@@ -1,10 +1,12 @@
 #coding:utf-8
 import requests
 
+GCE_ENDPOINT = "http://metadata"
+EC2_ENDPOINT = "http://169.254.169.254"
 
 METADATA_SERVERS = {
-    "GCE": "http://metadata",
-    "EC2": "http://169.254.169.254"
+    "GCE": GCE_ENDPOINT,
+    "EC2": EC2_ENDPOINT,
 }
 
 PROVIDER_CLASSES = {
@@ -13,10 +15,10 @@ PROVIDER_CLASSES = {
 }
 
 
-def get_provider(timeout=1):
+def _get_provider(session, timeout=1):
     for name, metadata_server in METADATA_SERVERS.items():
         try:
-            requests.get(metadata_server, timeout=timeout)
+            session.get(metadata_server, timeout=timeout)
         except requests.ConnectionError:
             continue
         else:
@@ -24,7 +26,7 @@ def get_provider(timeout=1):
     raise Exception("Unknown Cloud (tried: {0})".format(", ".join(METADATA_SERVERS.keys())))
 
 
-def get_provider_class(path):
+def _get_provider_class(path):
     module, klass = path.rsplit(".", 1)
     try:
         _mod = __import__(module, fromlist=[klass])
@@ -34,13 +36,16 @@ def get_provider_class(path):
         return getattr(_mod, klass)
 
 
-
-def Cloud(*args, **kwargs):
+def Cloud(session=None):
     """
     Retrieve an instance of the cloud you're running in
+    :param session: Session to use for HTTP requests
+    :type session: requests.sessions.Session
+    :returns: A Cloud instance corresponding to the platform the instance is running on
     :rtype: stackbench.cloud.base.BaseCloud
     """
-    provider_name = get_provider()
-    provider = get_provider_class(PROVIDER_CLASSES[provider_name])
-    return provider(*args, **kwargs)
-
+    if session is None:
+        session = requests.Session()
+    provider_name = _get_provider(session)
+    provider = _get_provider_class(PROVIDER_CLASSES[provider_name])
+    return provider(session)
