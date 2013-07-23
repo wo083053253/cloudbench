@@ -1,5 +1,4 @@
 #coding:utf-8
-import requests
 import string
 
 from stackbench.cloud.base import BaseCloud
@@ -34,7 +33,7 @@ class GCE(BaseCloud):
     @property
     def attachments(self):
         url = "/".join([self.metadata_server, "instance", "disks/",]) + "?recursive=true"
-        res = requests.get(url)
+        res = self.session.get(url)
         disks = res.json()
         return dict((get_attachment_point(disk), disk) for disk in disks if disk["type"] == GCE_DISK_PERSISTENT)
 

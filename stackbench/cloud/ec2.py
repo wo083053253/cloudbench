@@ -23,8 +23,15 @@ class EC2(BaseCloud):
     metadata_server = "http://169.254.169.254/latest/meta-data"
     instance_type = make_metadata_prop("instance-type")
     availability_zone = make_metadata_prop("placement/availability-zone")
-
     _instance_id = make_metadata_prop("instance-id")
+    _conn = None
+
+    @property
+    def conn(self):
+        # Boto will find its credentials from the environment and raise an error if they're not there.
+        if self._conn is None:
+            self._conn = boto.ec2.connect_to_region(self.location)
+        return self._conn
 
     @property
     def location(self):
@@ -32,8 +39,5 @@ class EC2(BaseCloud):
 
     @property
     def attachments(self):
-        # Boto will find its credentials from the environment and raise an error if they're not there.
-        conn = boto.ec2.connect_to_region(self.location)
-        print "Instance ID", self._instance_id
-        volumes = conn.get_all_volumes(filters={"attachment.instance-id": self._instance_id})
+        volumes = self.conn.get_all_volumes(filters={"attachment.instance-id": self._instance_id})
         return dict((get_attachment_point(volume), volume) for volume in volumes)
