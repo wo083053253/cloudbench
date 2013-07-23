@@ -49,7 +49,7 @@ class GCETestCase(unittest.TestCase):
         with MockPathExists(["/dev/sdc"]):
             attachments = cloud.attachments
         self.assertSequenceEqual(["/dev/sdc"], list(attachments.keys()))
-        self.assertDictEqual({u'deviceName': u'scalr-disk-1a043e80', u'type': u'PERSISTENT', u'mode': u'READ_WRITE', u'index': 2} , attachments["/dev/sdc"])
+        self.assertDictEqual({six.u('deviceName'): six.u('scalr-disk-1a043e80'), six.u('type'): six.u('PERSISTENT'), six.u('mode'): six.u('READ_WRITE'), six.u('index'): 2} , attachments["/dev/sdc"])
         self.assertEqual(0, len(adapter.responses))
 
     def test_error_propagation(self):
