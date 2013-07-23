@@ -13,6 +13,9 @@ setup(
     author_email='thomas@scalr.com',
     description='FIO Wrapper',
     install_requires=['requests', 'six'],
+    extras_require={
+        "EC2 Support": ["boto"],
+    },
     setup_requires=["nose"],
     tests_require=["tox", "nose"],
 )

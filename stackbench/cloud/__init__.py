@@ -3,20 +3,14 @@ import requests
 
 
 METADATA_SERVERS = {
-    "GCE": "http://metadata/computeMetadata/v1beta1",
-    "EC2": "http://169.254.169.254/latest/meta-data"
+    "GCE": "http://metadata",
+    "EC2": "http://169.254.169.254"
 }
 
-PROVIDER_CLASSES = {}
-
-
-def Cloud(*args, **kwargs):
-    """
-    Retrieve an instance of the cloud you're running in
-    :rtype: stackbench.cloud.base.BaseCloud
-    """
-    provider = get_provider()
-    return PROVIDER_CLASSES[provider](*args, **kwargs)
+PROVIDER_CLASSES = {
+    "GCE": "stackbench.cloud.gce.GCE",
+    "EC2": "stackbench.cloud.ec2.EC2"
+}
 
 
 def get_provider(timeout=1):
@@ -30,10 +24,23 @@ def get_provider(timeout=1):
     raise Exception("Unknown Cloud (tried: {0})".format(", ".join(METADATA_SERVERS.keys())))
 
 
-from stackbench.cloud.ec2 import EC2
-from stackbench.cloud.gce import GCE
+def get_provider_class(path):
+    module, klass = path.rsplit(".", 1)
+    try:
+        _mod = __import__(module, fromlist=[klass])
+    except ImportError as e:
+        raise Exception("Unable to import provider class {0}: {1}".format(path, e))
+    else:
+        return getattr(_mod, klass)
 
-PROVIDER_CLASSES.update({
-    "GCE": GCE,
-    "EC2": EC2
-})
+
+
+def Cloud(*args, **kwargs):
+    """
+    Retrieve an instance of the cloud you're running in
+    :rtype: stackbench.cloud.base.BaseCloud
+    """
+    provider_name = get_provider()
+    provider = get_provider_class(PROVIDER_CLASSES[provider_name])
+    return provider(*args, **kwargs)
+
