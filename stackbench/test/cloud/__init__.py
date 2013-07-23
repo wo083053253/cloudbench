@@ -2,12 +2,12 @@
 import os.path
 
 
-def boto_importable():
-    try:
-        import boto
-    except ImportError:
-        return False
-    return True
+try:
+    __import__("boto")
+except ImportError:
+    boto_importable = False
+else:
+    boto_importable = True
 
 
 class MockPathExists(object):
