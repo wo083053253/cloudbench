@@ -5,7 +5,7 @@ from stackbench.api.client import Client
 from stackbench.api.exceptions import MultipleObjectsReturned, NoSuchObject
 from stackbench.api.util import path_join
 
-from stackbench.test.api import TEST_ENDPOINT, PredictableTestAdapter, make_json_response
+from stackbench.test.utils import TEST_ENDPOINT, PredictableTestAdapter, make_json_response
 
 
 BASE_RESPONSE = {

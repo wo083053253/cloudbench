@@ -3,7 +3,7 @@ import unittest
 
 from stackbench.api.client import Client
 
-from stackbench.test.api import PredictableTestAdapter, make_json_response, TEST_ENDPOINT, RepeatingTestAdapter, extract_qs
+from stackbench.test.utils import PredictableTestAdapter, make_json_response, TEST_ENDPOINT, RepeatingTestAdapter, extract_qs
 
 
 EMPTY_RESPONSE = {

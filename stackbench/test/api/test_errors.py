@@ -5,7 +5,7 @@ from requests import Response
 from stackbench.api.client import Client
 from stackbench.api.exceptions import APIError
 
-from stackbench.test.api import TEST_ENDPOINT, RepeatingTestAdapter
+from stackbench.test.utils import TEST_ENDPOINT, RepeatingTestAdapter
 
 
 class ErrorTestCase(unittest.TestCase):
