@@ -22,12 +22,14 @@ class GCETestCase(unittest.TestCase):
         # Instance type
         response1 = requests.Response()
         response1.status_code = 200
-        response1._content = "projects/1234/machineTypes/n1-standard-1-d"
+        response1._content = six.b("projects/1234/machineTypes/n1-standard-1-d")
+        response1.encoding = "utf-8"
 
         # AZ
         response2 = requests.Response()
         response2.status_code = 200
-        response2._content = "projects/1234/zones/us-central1-b"
+        response2._content = six.b("projects/1234/zones/us-central1-b")
+        response2.encoding = "utf-8"
 
         # Attachments
         response3 = requests.Response()
@@ -46,7 +48,7 @@ class GCETestCase(unittest.TestCase):
         self.assertEqual("us-central1", cloud.location)
         with MockPathExists(["/dev/sdc"]):
             attachments = cloud.attachments
-        self.assertItemsEqual(["/dev/sdc"], attachments.keys())
+        self.assertSequenceEqual(["/dev/sdc"], list(attachments.keys()))
         self.assertDictEqual({u'deviceName': u'scalr-disk-1a043e80', u'type': u'PERSISTENT', u'mode': u'READ_WRITE', u'index': 2} , attachments["/dev/sdc"])
         self.assertEqual(0, len(adapter.responses))
 
