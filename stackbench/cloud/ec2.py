@@ -1,22 +1,17 @@
 #coding:utf-8
-import os.path
+import six
 
 import boto.ec2
 
+from stackbench.cloud import get_attachment_point
 from stackbench.cloud.base import BaseCloud
 from stackbench.cloud.factory import make_metadata_prop
+from stackbench.cloud.exceptions import VolumeUnavailableError
 
 
-def get_attachment_point(volume):
-    status = volume.status
-    assert status == u"in-use", "Can't get attachment point for a non-attached volume!"
-    device_path = volume.attach_data.device
-    if os.path.exists(device_path):
-        return device_path
-    xvd_path = device_path.replace("/dev/sd", "/dev/xvd")
-    if os.path.exists(xvd_path):
-        return xvd_path
-    raise Exception("Could not find attachment point for {0}".format(device_path))
+def check_volume_attached(volume):
+    if six.u(volume.status) != six.u("in-use"):
+        raise VolumeUnavailableError(volume)
 
 
 class EC2(BaseCloud):
@@ -40,4 +35,6 @@ class EC2(BaseCloud):
     @property
     def attachments(self):
         volumes = self.conn.get_all_volumes(filters={"attachment.instance-id": self._instance_id})
-        return dict((get_attachment_point(volume), volume) for volume in volumes)
+        for volume in volumes:
+            check_volume_attached(volume)
+        return dict((get_attachment_point(volume.attach_data.device), volume) for volume in volumes)

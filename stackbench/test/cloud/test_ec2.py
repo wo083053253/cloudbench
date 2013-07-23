@@ -1,14 +1,12 @@
 #coding:utf-8
 import unittest
-import os.path
-
-
 import requests
+
 from boto.ec2.volume import Volume, AttachmentSet
 
 from stackbench.cloud import GCE_ENDPOINT, Cloud, EC2_ENDPOINT
 
-from stackbench.test.cloud import boto_importable
+from stackbench.test.cloud import boto_importable, MockPathExists
 from stackbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter
 
 
@@ -69,23 +67,15 @@ class EC2TestCase(unittest.TestCase):
 
         volumes = [volume1, volume2]
 
-        class MockPathExists(object):
-            def __init__(self, existing_paths):
-                self.existing_paths = existing_paths
-
-            def __call__(self, path):
-                return path in self.existing_paths
-
         self.ec2_response._content = "i-1234"
         adapter = RepeatingTestAdapter(self.ec2_response)
         self.session.mount(EC2_ENDPOINT, adapter)
         cloud = Cloud(self.session)
         cloud._conn = MockConn(volumes)
 
-        _exists = os.path.exists
-        os.path.exists = MockPathExists(["/dev/sda", "/dev/xvdg"])
+        with MockPathExists(["/dev/sda", "/dev/xvdg"]):
+            attachments = cloud.attachments
 
-        attachments = cloud.attachments
         self.assertItemsEqual(["/dev/xvdg", "/dev/sda"], attachments.keys())
 
         self.assertEqual(volume1, attachments["/dev/xvdg"])
@@ -93,5 +83,3 @@ class EC2TestCase(unittest.TestCase):
 
         self.assertEqual(1, len(cloud._conn.requests))
         self.assertDictEqual({"attachment.instance-id":"i-1234"}, cloud._conn.requests[0])
-
-        os.path.exists = _exists

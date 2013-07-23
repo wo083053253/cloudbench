@@ -1,5 +1,8 @@
 #coding:utf-8
+import os.path
 import requests
+
+from stackbench.cloud.exceptions import VolumeUnavailableError, VolumeNotFoundError, CloudUnavailableError
 
 GCE_ENDPOINT = "http://metadata"
 EC2_ENDPOINT = "http://169.254.169.254"
@@ -14,6 +17,14 @@ PROVIDER_CLASSES = {
     "EC2": "stackbench.cloud.ec2.EC2"
 }
 
+def get_attachment_point(device_path):
+    if os.path.exists(device_path):
+        return device_path
+    xvd_path = device_path.replace("/dev/sd", "/dev/xvd")
+    if os.path.exists(xvd_path):
+        return xvd_path
+    raise VolumeNotFoundError(device_path)
+
 
 def _get_provider(session, timeout=1):
     for name, metadata_server in METADATA_SERVERS.items():
@@ -23,7 +34,7 @@ def _get_provider(session, timeout=1):
             continue
         else:
             return name
-    raise Exception("Unknown Cloud (tried: {0})".format(", ".join(METADATA_SERVERS.keys())))
+    raise CloudUnavailableError("Tried: {0}".format(", ".join(METADATA_SERVERS.keys())))
 
 
 def _get_provider_class(path):
@@ -31,7 +42,7 @@ def _get_provider_class(path):
     try:
         _mod = __import__(module, fromlist=[klass])
     except ImportError as e:
-        raise Exception("Unable to import provider class {0}: {1}".format(path, e))
+        raise CloudUnavailableError("Unable to import provider class {0}: {1}".format(path, e))
     else:
         return getattr(_mod, klass)
 
@@ -49,3 +60,4 @@ def Cloud(session=None):
     provider_name = _get_provider(session)
     provider = _get_provider_class(PROVIDER_CLASSES[provider_name])
     return provider(session)
+

@@ -5,6 +5,7 @@ import six
 import requests
 
 from stackbench.cloud import GCE_ENDPOINT, EC2_ENDPOINT, Cloud
+from stackbench.test.cloud import MockPathExists
 
 from stackbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter
 
@@ -42,7 +43,8 @@ class GCETestCase(unittest.TestCase):
         self.assertEqual("n1-standard-1-d", cloud.instance_type)
         self.assertEqual("us-central1-b", cloud.availability_zone)
         self.assertEqual("us-central1", cloud.location)
-        attachments = cloud.attachments
+        with MockPathExists(["/dev/sdc"]):
+            attachments = cloud.attachments
         self.assertItemsEqual(["/dev/sdc"], attachments.keys())
         self.assertDictEqual({u'deviceName': u'scalr-disk-1a043e80', u'type': u'PERSISTENT', u'mode': u'READ_WRITE', u'index': 2} , attachments["/dev/sdc"])
         self.assertEqual(0, len(adapter.responses))
