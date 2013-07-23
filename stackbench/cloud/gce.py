@@ -10,7 +10,7 @@ GCE_DISK_PERSISTENT = "PERSISTENT"
 
 
 def translate_attachment_point(disk):
-    return "/dev/sd{0}".format(string.letters[disk["index"]])
+    return "/dev/sd{0}".format(string.ascii_lowercase[disk["index"]])
 
 
 
