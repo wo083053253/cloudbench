@@ -65,7 +65,10 @@ class EC2TestCase(unittest.TestCase):
         volume2.attach_data.device = "/dev/sda"
         volume2.status = "in-use"
 
-        volumes = [volume1, volume2]
+        volume3 = Volume()
+        volume3.status = "attaching"
+
+        volumes = [volume1, volume2, volume3]
 
         self.ec2_response._content = "i-1234"
         adapter = RepeatingTestAdapter(self.ec2_response)

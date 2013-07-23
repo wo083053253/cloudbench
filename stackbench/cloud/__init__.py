@@ -2,7 +2,8 @@
 import os.path
 import requests
 
-from stackbench.cloud.exceptions import VolumeUnavailableError, VolumeNotFoundError, CloudUnavailableError
+from stackbench.cloud.exceptions import VolumeNotFoundError, CloudUnavailableError
+
 
 GCE_ENDPOINT = "http://metadata"
 EC2_ENDPOINT = "http://169.254.169.254"
@@ -17,7 +18,8 @@ PROVIDER_CLASSES = {
     "EC2": "stackbench.cloud.ec2.EC2"
 }
 
-def get_attachment_point(device_path):
+
+def find_attachment_point(device_path):
     if os.path.exists(device_path):
         return device_path
     xvd_path = device_path.replace("/dev/sd", "/dev/xvd")

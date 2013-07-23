@@ -4,17 +4,12 @@ class CloudError(Exception):
     Base class for Cloud introspection errors
     """
 
-class VolumeUnavailableError(CloudError):
-    """
-    Raised when a volume is unavailable (not mounted yet)
-    """
-    def __init__(self, volume):
-        self.volume = volume
-
-class VolumeNotFoundError(VolumeUnavailableError):
+class VolumeNotFoundError(CloudError):
     """
     Raised when we were unable to find a volume on the system.
     """
+    def __init__(self, path):
+        self.path = path
 
 class CloudUnavailableError(CloudError):
     """

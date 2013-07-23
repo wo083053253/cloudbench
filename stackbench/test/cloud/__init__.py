@@ -1,12 +1,14 @@
 #coding:utf-8
 import os.path
 
+
 def boto_importable():
     try:
         import boto
     except ImportError:
         return False
     return True
+
 
 class MockPathExists(object):
     def __init__(self, existing_paths):

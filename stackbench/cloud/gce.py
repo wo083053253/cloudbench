@@ -1,7 +1,7 @@
 #coding:utf-8
 import string
 
-from stackbench.cloud import get_attachment_point
+from stackbench.cloud import find_attachment_point
 from stackbench.cloud.base import BaseCloud
 from stackbench.cloud.factory import make_metadata_prop
 
@@ -36,5 +36,5 @@ class GCE(BaseCloud):
         url = "/".join([self.metadata_server, "instance", "disks/",]) + "?recursive=true"
         res = self.session.get(url)
         disks = res.json()
-        return dict((get_attachment_point(translate_attachment_point(disk)), disk) for disk in disks if disk["type"] == GCE_DISK_PERSISTENT)
+        return dict((find_attachment_point(translate_attachment_point(disk)), disk) for disk in disks if disk["type"] == GCE_DISK_PERSISTENT)
 

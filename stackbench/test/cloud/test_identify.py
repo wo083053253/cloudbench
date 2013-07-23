@@ -3,6 +3,7 @@ import unittest
 import requests
 
 from stackbench.cloud import EC2_ENDPOINT, GCE_ENDPOINT, Cloud
+from stackbench.cloud.exceptions import CloudUnavailableError
 
 from stackbench.test.cloud import boto_importable
 from stackbench.test.utils import RepeatingTestAdapter, UnreachableTestAdapter
@@ -36,3 +37,9 @@ class IdentifyCloudTestCase(unittest.TestCase):
         cloud = Cloud(self.session)
 
         self.assertEqual("GCE", cloud.__class__.__name__)
+
+    def test_not_found(self):
+        self.session.mount(EC2_ENDPOINT, UnreachableTestAdapter())
+        self.session.mount(GCE_ENDPOINT, UnreachableTestAdapter())
+
+        self.assertRaises(CloudUnavailableError, Cloud, self.session)

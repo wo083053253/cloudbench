@@ -5,9 +5,10 @@ import six
 import requests
 
 from stackbench.cloud import GCE_ENDPOINT, EC2_ENDPOINT, Cloud
+from stackbench.cloud.exceptions import CloudAPIError
 from stackbench.test.cloud import MockPathExists
 
-from stackbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter
+from stackbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter
 
 
 class GCETestCase(unittest.TestCase):
@@ -48,3 +49,14 @@ class GCETestCase(unittest.TestCase):
         self.assertItemsEqual(["/dev/sdc"], attachments.keys())
         self.assertDictEqual({u'deviceName': u'scalr-disk-1a043e80', u'type': u'PERSISTENT', u'mode': u'READ_WRITE', u'index': 2} , attachments["/dev/sdc"])
         self.assertEqual(0, len(adapter.responses))
+
+    def test_error_propagation(self):
+        response = requests.Response()
+        response.status_code = 500
+        adapter = RepeatingTestAdapter(response)
+
+        self.session.mount(GCE_ENDPOINT, adapter)
+
+        cloud = Cloud(self.session)
+
+        self.assertRaises(CloudAPIError, getattr, cloud, "location")

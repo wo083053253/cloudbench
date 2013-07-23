@@ -3,15 +3,13 @@ import six
 
 import boto.ec2
 
-from stackbench.cloud import get_attachment_point
+from stackbench.cloud import find_attachment_point
 from stackbench.cloud.base import BaseCloud
 from stackbench.cloud.factory import make_metadata_prop
-from stackbench.cloud.exceptions import VolumeUnavailableError
 
 
-def check_volume_attached(volume):
-    if six.u(volume.status) != six.u("in-use"):
-        raise VolumeUnavailableError(volume)
+def is_attached(volume):
+    return six.u(volume.status) == six.u("in-use")
 
 
 class EC2(BaseCloud):
@@ -35,6 +33,4 @@ class EC2(BaseCloud):
     @property
     def attachments(self):
         volumes = self.conn.get_all_volumes(filters={"attachment.instance-id": self._instance_id})
-        for volume in volumes:
-            check_volume_attached(volume)
-        return dict((get_attachment_point(volume.attach_data.device), volume) for volume in volumes)
+        return dict((find_attachment_point(volume.attach_data.device), volume) for volume in volumes if is_attached(volume))
