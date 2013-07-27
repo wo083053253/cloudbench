@@ -1,21 +1,36 @@
+#coding:utf-8
 from setuptools import setup
 
 setup(
     name='stackbench',
-    version='0.1',
+    version='0.1.0',
     packages=[
         'stackbench', 'stackbench.fio', 'stackbench.api', 'stackbench.utils',
         'stackbench.test', 'stackbench.test.api'
     ],
-    url='',
-    license='',
+    url='https://github.com/Scalr/stackbench',
+    license='Apache 2.0',
     author='Thomas Orozco',
     author_email='thomas@scalr.com',
-    description='FIO Wrapper',
+    description='An utility to benchmark your Cloud',
+    long_description=open("README.rst").read(),
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "License :: OSI Approved :: Apache Software License",
+    ],
     install_requires=['requests', 'six'],
     extras_require={
         "EC2 Support": ["boto"],
-    },
+        },
     setup_requires=["nose"],
     tests_require=["tox", "nose"],
 )
