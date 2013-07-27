@@ -1,13 +1,10 @@
 #coding:utf-8
-from setuptools import setup
+import setuptools
 
-setup(
+setuptools.setup(
     name='stackbench',
-    version='0.1.0',
-    packages=[
-        'stackbench', 'stackbench.fio', 'stackbench.api', 'stackbench.utils',
-        'stackbench.test', 'stackbench.test.api'
-    ],
+    version='0.1.1',
+    packages=setuptools.find_packages(),
     url='https://github.com/Scalr/stackbench',
     license='Apache 2.0',
     author='Thomas Orozco',
