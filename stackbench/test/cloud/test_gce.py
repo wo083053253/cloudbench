@@ -53,8 +53,8 @@ class GCETestCase(unittest.TestCase):
             self.assertSequenceEqual(["/dev/sda", "/dev/sdb", "/dev/sdc"],
                                      [attachment.device for attachment in attachments])
 
-            self.assertSequenceEqual([False, False, True],
-                                     [attachment.persistent for attachment in attachments])
+        self.assertSequenceEqual([False, False, True],
+                                 [attachment.persistent for attachment in attachments])
 
         self.assertEqual(0, len(adapter.responses))
 

@@ -46,6 +46,9 @@ class BaseCloud(object):
         """
         raise NotImplementedError()
 
+    def __repr__(self):
+        return "<{0}>".format(self.__class__.__name__)
+
 
 class BaseVolume(object):
     @property
@@ -74,3 +77,6 @@ class BaseVolume(object):
         :rtype: bool
         """
         raise NotImplementedError()
+
+    def __repr__(self):
+        return "<{0}: {1} ({2})>".format(self.__class__.__name__, self.device, "P" if self.persistent else "E")
