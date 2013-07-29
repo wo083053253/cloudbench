@@ -9,7 +9,7 @@ from stackbench.cloud.factory import make_metadata_prop
 
 
 def is_attached(volume):
-    return six.u(volume.status) == six.u("in-use")
+    return volume.status == six.u("in-use")
 
 
 class EC2(BaseCloud):
