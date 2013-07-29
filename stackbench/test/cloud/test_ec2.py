@@ -73,6 +73,7 @@ class EC2TestCase(unittest.TestCase):
 
         volume3 = self.Volume()
         volume3.status = "attaching"
+        volume3.attach_data = self.AttachmentSet()
 
         volumes = [volume1, volume2, volume3]
 
@@ -82,13 +83,12 @@ class EC2TestCase(unittest.TestCase):
         cloud = Cloud(self.session)
         cloud._conn = MockConn(volumes)
 
+        attachments = cloud.attachments
+
         with MockPathExists(["/dev/sda", "/dev/xvdg"]):
-            attachments = cloud.attachments
+            self.assertItemsEqual(["/dev/xvdg", "/dev/sda"], [attachment.device for attachment in attachments])
 
-        self.assertItemsEqual(["/dev/xvdg", "/dev/sda"], attachments.keys())
-
-        self.assertEqual(volume1, attachments["/dev/xvdg"])
-        self.assertEqual(volume2, attachments["/dev/sda"])
+        self.assertEqual([True, True], [attachment.persistent for attachment in attachments])
 
         self.assertEqual(1, len(cloud._conn.requests))
         self.assertDictEqual({"attachment.instance-id":"i-1234"}, cloud._conn.requests[0])

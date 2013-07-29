@@ -1,4 +1,7 @@
 #coding:utf-8
+from stackbench.cloud import find_attachment_point
+
+
 class BaseCloud(object):
     def __init__(self, session):
         """
@@ -39,6 +42,35 @@ class BaseCloud(object):
     @property
     def attachments(self):
         """
-        :rtype: dict
+        :rtype: list of BaseVolume
+        """
+        raise NotImplementedError()
+
+
+class BaseVolume(object):
+    @property
+    def device(self):
+        """
+        The device where the volume is found on the filesystem.
+
+        :rtype: str
+        """
+        return find_attachment_point(self._cloud_device)
+
+    @property
+    def _cloud_device(self):
+        """
+        The device as reported by the Cloud.
+
+        :rtype: str
+        """
+        raise NotImplementedError()
+
+    @property
+    def persistent(self):
+        """
+        Whether this volume is persistent.
+
+        :rtype: bool
         """
         raise NotImplementedError()

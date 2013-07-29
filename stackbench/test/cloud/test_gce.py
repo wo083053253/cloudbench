@@ -46,10 +46,16 @@ class GCETestCase(unittest.TestCase):
         self.assertEqual("n1-standard-1-d", cloud.instance_type)
         self.assertEqual("us-central1-b", cloud.availability_zone)
         self.assertEqual("us-central1", cloud.location)
-        with MockPathExists(["/dev/sdc"]):
-            attachments = cloud.attachments
-        self.assertSequenceEqual(["/dev/sdc"], list(attachments.keys()))
-        self.assertDictEqual({six.u('deviceName'): six.u('scalr-disk-1a043e80'), six.u('type'): six.u('PERSISTENT'), six.u('mode'): six.u('READ_WRITE'), six.u('index'): 2} , attachments["/dev/sdc"])
+
+        attachments = cloud.attachments
+
+        with MockPathExists(["/dev/sda", "/dev/sdb", "/dev/sdc"]):
+            self.assertSequenceEqual(["/dev/sda", "/dev/sdb", "/dev/sdc"],
+                                     [attachment.device for attachment in attachments])
+
+            self.assertSequenceEqual([False, False, True],
+                                     [attachment.persistent for attachment in attachments])
+
         self.assertEqual(0, len(adapter.responses))
 
     def test_error_propagation(self):

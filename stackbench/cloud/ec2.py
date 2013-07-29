@@ -4,12 +4,26 @@ import six
 import boto.ec2
 
 from stackbench.cloud import find_attachment_point
-from stackbench.cloud.base import BaseCloud
+from stackbench.cloud.base import BaseCloud, BaseVolume
 from stackbench.cloud.factory import make_metadata_prop
 
 
 def is_attached(volume):
     return volume.status == six.u("in-use")
+
+
+class EC2Volume(BaseVolume):
+    def __init__(self, volume):
+        self._volume = volume
+
+    @property
+    def _cloud_device(self):
+        return self._volume.attach_data.device
+
+    @property
+    def persistent(self):
+        #TODO: We only return EBS volumes
+        return True
 
 
 class EC2(BaseCloud):
@@ -32,5 +46,6 @@ class EC2(BaseCloud):
 
     @property
     def attachments(self):
+        #TODO: This only returns EBS volumes
         volumes = self.conn.get_all_volumes(filters={"attachment.instance-id": self._instance_id})
-        return dict((find_attachment_point(volume.attach_data.device), volume) for volume in volumes if is_attached(volume))
+        return [EC2Volume(volume) for volume in volumes if is_attached(volume)]
