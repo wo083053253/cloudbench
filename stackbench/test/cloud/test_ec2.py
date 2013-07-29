@@ -45,6 +45,7 @@ class EC2TestCase(unittest.TestCase):
         self.assertEqual("us-east-1a", cloud.availability_zone)
         self.assertEqual("us-east-1", cloud.location)
         self.assertEqual(0, len(adapter.responses))
+        self.assertEqual("EC2", cloud.provider)
 
     def test_attachments(self):
         """
@@ -92,3 +93,5 @@ class EC2TestCase(unittest.TestCase):
 
         self.assertEqual(1, len(cloud._conn.requests))
         self.assertDictEqual({"attachment.instance-id":"i-1234"}, cloud._conn.requests[0])
+
+        self.assertSequenceEqual(["EBS"] * 2, [attachment.provider for attachment in attachments])

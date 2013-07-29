@@ -46,6 +46,7 @@ class GCETestCase(unittest.TestCase):
         self.assertEqual("n1-standard-1-d", cloud.instance_type)
         self.assertEqual("us-central1-b", cloud.availability_zone)
         self.assertEqual("us-central1", cloud.location)
+        self.assertEqual("GCE", cloud.provider)
 
         attachments = cloud.attachments
 
@@ -55,6 +56,8 @@ class GCETestCase(unittest.TestCase):
 
         self.assertSequenceEqual([False, False, True],
                                  [attachment.persistent for attachment in attachments])
+
+        self.assertSequenceEqual(["GCE Disk"] * 3, [attachment.provider for attachment in attachments])
 
         self.assertEqual(0, len(adapter.responses))
 

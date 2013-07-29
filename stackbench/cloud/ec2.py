@@ -13,6 +13,8 @@ def is_attached(volume):
 
 
 class EC2Volume(BaseVolume):
+    provider = "EBS"
+
     def __init__(self, volume):
         self._volume = volume
 
@@ -27,6 +29,8 @@ class EC2Volume(BaseVolume):
 
 
 class EC2(BaseCloud):
+    provider = "EC2"
+
     metadata_server = "http://169.254.169.254/latest/meta-data"
     instance_type = make_metadata_prop("instance-type")
     availability_zone = make_metadata_prop("placement/availability-zone")

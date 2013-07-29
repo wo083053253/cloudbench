@@ -10,7 +10,6 @@ class BaseCloud(object):
         """
         self.session = session
 
-
     @property
     def metadata_server(self):
         """
@@ -46,6 +45,15 @@ class BaseCloud(object):
         """
         raise NotImplementedError()
 
+    @property
+    def provider(self):
+        """
+        The provider for this Cloud
+
+        :rtype: str
+        """
+        raise NotImplementedError()
+
     def __repr__(self):
         return "<{0}>".format(self.__class__.__name__)
 
@@ -75,6 +83,15 @@ class BaseVolume(object):
         Whether this volume is persistent.
 
         :rtype: bool
+        """
+        raise NotImplementedError()
+
+    @property
+    def provider(self):
+        """
+        The provider for this Volume
+
+        :rtype: str
         """
         raise NotImplementedError()
 

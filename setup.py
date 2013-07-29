@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='stackbench',
-    version='0.2.2',
+    version='0.2.3',
     packages=setuptools.find_packages(),
     url='https://github.com/Scalr/stackbench',
     license='Apache 2.0',

@@ -14,6 +14,8 @@ def translate_attachment_point(index):
 
 
 class GCEVolume(BaseVolume):
+    provider = "GCE Disk"
+
     def __init__(self, vol_info):
         self._vol_info = vol_info
 
@@ -27,6 +29,8 @@ class GCEVolume(BaseVolume):
 
 
 class GCE(BaseCloud):
+    provider = "GCE"
+
     metadata_server = "http://metadata/computeMetadata/v1beta1"
     fq_instance_type = make_metadata_prop("instance/machine-type")
     fq_availability_zone = make_metadata_prop("instance/zone")
