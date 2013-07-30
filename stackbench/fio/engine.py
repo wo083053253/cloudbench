@@ -3,9 +3,13 @@ import os
 import shutil
 import subprocess
 import tempfile
+import logging
 
 from stackbench.fio.exceptions import FIOInvalidVersion, FIOCallError, FIOError
 from stackbench.fio.output import FORMAT
+
+
+logger = logging.getLogger()
 
 
 class FIOEngine(object):
@@ -75,6 +79,9 @@ class FIOEngine(object):
         report = []
 
         for reporting_group in fio_output.split("\n"):
+            if reporting_group.startswith("fio:"):
+                logger.warning("Received fio warning: %s", reporting_group)
+                continue
 
             d = dict(zip(FORMAT, reporting_group.split(";")))
 
