@@ -1,5 +1,6 @@
 #coding:utf-8
 import os
+import shutil
 import subprocess
 import tempfile
 
@@ -88,8 +89,10 @@ class FIOEngine(object):
 
     def run_test(self):
         self.check_version()
-        with tempfile.TemporaryDirectory() as temp_dir:
-            config_path = self.generate_config(temp_dir)
-            output = self.execute_fio(config_path)
+        temp_dir = tempfile.mkdtemp()  # No context manager on older pythons!
 
+        config_path = self.generate_config(temp_dir)
+        output = self.execute_fio(config_path)
+
+        shutil.rmtree(temp_dir)
         return self.report(output)
