@@ -87,10 +87,13 @@ def identify_benchmark_volume(cloud, nobench):
     """
     persistent_volumes = [volume for volume in cloud.attachments if volume.persistent]
     acceptable_volumes = [volume for volume in persistent_volumes if may_bench(nobench, volume.device)]
-    _devices = [vol.device for vol in acceptable_volumes]
+
     if not acceptable_volumes:
+        _devices = [vol.device for vol in persistent_volumes]
         raise Exception("No volume to benchmark. None of {0} is acceptable", ", ".join(_devices))
+
     if len(acceptable_volumes) > 1:
+        _devices = [vol.device for vol in acceptable_volumes]
         raise Exception("Too many volumes: {0}".format(", ".join(_devices)))
 
     # Found the volume, move on!
