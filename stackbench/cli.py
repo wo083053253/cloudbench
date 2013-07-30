@@ -28,8 +28,8 @@ DEFAULT_PID_FILE = "/var/run/stackbench.pid"
 DEFAULT_LOG_FILE = "/var/log/stackbench.log"
 
 DEFAULT_FILE_SIZE = "10G"
-DEFAULT_RAMP_TIME = 15
-DEFAULT_DURATION = 600
+DEFAULT_RAMP_TIME = "15"
+DEFAULT_DURATION = "600"
 
 
 
@@ -197,6 +197,8 @@ def main():
         "ramp": DEFAULT_RAMP_TIME,
         "duration": DEFAULT_DURATION
     })
+    config.add_section("environment")
+    config.add_section("general")
     config.read(args.config)
 
     fio_bin = config.get("environment", "fio")
