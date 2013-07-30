@@ -2,14 +2,14 @@
 import setuptools
 
 setuptools.setup(
-    name='stackbench',
-    version='0.2.3',
+    name="stackbench",
+    version="0.2.3",
     packages=setuptools.find_packages(),
-    url='https://github.com/Scalr/stackbench',
-    license='Apache 2.0',
-    author='Thomas Orozco',
-    author_email='thomas@scalr.com',
-    description='An utility to benchmark your Cloud',
+    url="https://github.com/Scalr/stackbench",
+    license="Apache 2.0",
+    author="Thomas Orozco",
+    author_email="thomas@scalr.com",
+    description="An utility to benchmark your Cloud",
     long_description=open("README.rst").read(),
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -24,7 +24,12 @@ setuptools.setup(
         "Programming Language :: Python :: Implementation :: CPython",
         "License :: OSI Approved :: Apache Software License",
     ],
-    install_requires=['requests', 'six'],
+    entry_points={
+        'console_scripts': [
+            'stackbench = stackbench.cli:main',
+            ],
+        },
+    install_requires=["requests", "six", "lockfile", "argparse"],
     extras_require={
         "EC2 Support": ["boto"],
         },
