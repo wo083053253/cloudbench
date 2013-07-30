@@ -50,7 +50,9 @@ def setup_logging(log_file):
     stdout_handler.setFormatter(formatter)
     logger.addHandler(stdout_handler)
 
+    # Silence libraries
     logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("boto").setLevel(logging.WARNING)
 
     return [file_handler.stream]
 
@@ -177,7 +179,7 @@ def start_benchmark(cloud, api_client, benchmark_volume, fio_bin,  block_sizes, 
 
 def _cnf_get_list(config, section, key):
     list_ = config.get(section, key).split(',')
-    return [element.strip() for element in list_]
+    return [element.strip() for element in list_ if element.strip()]
 
 
 def main():
