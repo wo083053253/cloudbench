@@ -57,7 +57,8 @@ class GCETestCase(unittest.TestCase):
         self.assertSequenceEqual([False, False, True],
                                  [attachment.persistent for attachment in attachments])
 
-        self.assertSequenceEqual(["GCE Disk"] * 3, [attachment.provider for attachment in attachments])
+        self.assertSequenceEqual([["GCE Disk"]] * 3, [attachment.assets for attachment in attachments])
+        #TODO: This is to be fixed once we implement size on GCE Volumes
 
         self.assertEqual(0, len(adapter.responses))
 

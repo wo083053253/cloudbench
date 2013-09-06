@@ -106,11 +106,17 @@ def identify_benchmark_volume(cloud, nobench):
 def create_api_assets(cloud, api_client, benchmark_volume):
     provider = api_client.providers.get_or_create(name=cloud.provider)
     location = api_client.locations.get_or_create(name=cloud.location, provider=provider)
+
     instance_type = api_client.abstract_assets.get_or_create(name=cloud.instance_type)
-    volume_type = api_client.abstract_assets.get_or_create(name=benchmark_volume.provider)
     instance = api_client.physical_assets.get_or_create(asset=instance_type, location=location)
-    volume = api_client.physical_assets.get_or_create(asset=volume_type, location=location)
-    return [instance, volume]
+    assets = [instance]
+
+    for asset in benchmark_volume.assets:
+        abstract_asset = api_client.abstract_assets.get_or_create(name=asset)
+        api_client.physical_assets.get_or_create(asset=abstract_asset, location=location)
+        assets.append(asset)
+
+    return assets
 
 
 def warm_volume(base_job, fio_bin):
@@ -146,7 +152,7 @@ def run_benchmarks(api_client, assets, base_job, fio_bin, block_sizes, depths, m
             "stonewall": None,
         })
 
-        configuration = api_client.configurations.get_or_create( {
+        configuration = api_client.configurations.get_or_create(**{
                 "mode": job.mode,
                 "block_size": job.block_size.rstrip("k"),  # The API excepts an integer here.
                 "io_depth": job.io_depth

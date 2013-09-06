@@ -66,15 +66,19 @@ class EC2TestCase(unittest.TestCase):
         volume1.attach_data = self.AttachmentSet()
         volume1.status = "in-use"
         volume1.attach_data.device = "/dev/sdg"
+        volume1.size = 10
 
         volume2 = self.Volume()
         volume2.attach_data = self.AttachmentSet()
         volume2.attach_data.device = "/dev/sda"
         volume2.status = "in-use"
+        volume2.size = 100
+        volume2.iops = 100
 
         volume3 = self.Volume()
         volume3.status = "attaching"
         volume3.attach_data = self.AttachmentSet()
+        volume3.size = 15
 
         volumes = [volume1, volume2, volume3]
 
@@ -93,5 +97,7 @@ class EC2TestCase(unittest.TestCase):
 
         self.assertEqual(1, len(cloud._conn.requests))
         self.assertDictEqual({"attachment.instance-id":"i-1234"}, cloud._conn.requests[0])
-
-        self.assertSequenceEqual(["EBS"] * 2, [attachment.provider for attachment in attachments])
+        self.assertSequenceEqual(
+            [["EBS", "10 GB"], ["EBS", "100 GB", "100 PIOPS"]],
+            [attachment.assets for attachment in attachments]
+        )

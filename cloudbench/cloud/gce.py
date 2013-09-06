@@ -1,7 +1,6 @@
 #coding:utf-8
 import string
 
-from cloudbench.cloud import find_attachment_point
 from cloudbench.cloud.base import BaseCloud, BaseVolume
 from cloudbench.cloud.factory import make_metadata_prop
 
@@ -26,6 +25,10 @@ class GCEVolume(BaseVolume):
     @property
     def persistent(self):
         return self._vol_info["type"] == GCE_DISK_PERSISTENT
+
+    @property
+    def provider(self):
+        return "GCE Disk" if self.persistent else "GCE Scratch"
 
 
 class GCE(BaseCloud):
