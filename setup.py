@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="cloudbench",
-    version="0.3.1",
+    version="0.3.2",
     packages=setuptools.find_packages(),
     url="https://github.com/Scalr/cloudbench",
     license="Apache 2.0",
