@@ -8,7 +8,7 @@ def attribute_sum_factory(prop):
         value = 0
         for mode, is_mode in [("read", self.job.is_read), ("write", self.job.is_write)]:
             if is_mode:
-                value += int(self.report["{0}-{1}".format(mode, prop)])
+                value += int(float(self.report["{0}-{1}".format(mode, prop)]))
         return value
     return fn
 
