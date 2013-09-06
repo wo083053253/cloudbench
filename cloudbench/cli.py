@@ -114,7 +114,7 @@ def create_api_assets(cloud, api_client, benchmark_volume):
     for asset in benchmark_volume.assets:
         abstract_asset = api_client.abstract_assets.get_or_create(name=asset)
         api_client.physical_assets.get_or_create(asset=abstract_asset, location=location)
-        assets.append(asset)
+        assets.append(abstract_asset)
 
     return assets
 
@@ -130,7 +130,7 @@ def report_benchmark(api_client, assets, configuration, job_report):
 
         api_client.measurements.create(
             configuration=configuration,
-            assets=[a for a in assets],
+            assets=assets,
             metric=metric,
             value=value,
         )

@@ -27,6 +27,6 @@ class SingleJobReport(object):
         self.job = job
         self.report = report
 
-    avg_iops = attribute_sum_factory("io-iops")
-    avg_lat = attribute_sum_factory("latency-usec-total-avg")
-    avg_bw = attribute_sum_factory("banwidth-avg")
+    avg_iops = property(attribute_sum_factory("io-iops"))
+    avg_lat = property(attribute_sum_factory("latency-usec-total-avg"))
+    avg_bw = property(attribute_sum_factory("banwidth-avg"))
