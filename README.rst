@@ -1,10 +1,10 @@
 **********
-Stackbench
+Cloudbench
 **********
 
-Stackbench is a library designed to make Cloud benchmarking easier.
+Cloudbench is a library designed to make Cloud benchmarking easier.
 
-Stackbench integrates with a web service (not yet publicly available) to upload
+Cloudbench integrates with a web service (not yet publicly available) to upload
 benchmark results, and compare your Cloud with other offerings.
 
 
@@ -18,8 +18,8 @@ First, define the configuration file for the benchmark:
 
     [environment]
     fio = Path to the fio binary [/usr/local/bin/fio]
-    pidfile = Path to the pid file to use [var/run/stackbench.pid]
-    logfile = Path to the log file to use [/var/log/stackbech.log]
+    pidfile = Path to the pid file to use [var/run/cloudbench.pid]
+    logfile = Path to the log file to use [/var/log/cloudbench.log]
     nobench = Comma-separated list of devices to not use in benchmark []
 
     [general]
