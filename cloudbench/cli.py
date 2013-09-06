@@ -114,8 +114,8 @@ def create_api_assets(cloud, api_client, benchmark_volume):
 
     for asset in benchmark_volume.assets:
         abstract_asset = api_client.abstract_assets.get_or_create(name=asset)
-        api_client.physical_assets.get_or_create(asset=abstract_asset, location=location)
-        assets.append(abstract_asset)
+        physical_asset = api_client.physical_assets.get_or_create(asset=abstract_asset, location=location)
+        assets.append(physical_asset)
 
     return assets
 

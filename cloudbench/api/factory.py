@@ -11,6 +11,17 @@ def _get_by_url(session, url):
     res.raise_for_status()
     return res.json()
 
+def _clean_related_filters(filters):
+    """
+    :param filters: Filters that we want to search (and fix) for related objects
+    :type filters: dict
+    """
+    for key, value in list(filters.items()):  # I don't want a view here
+        if type(value) == dict:  #TODO: Need to wrap those into API objects
+            rel_id = value.get("id")
+            filters[key] = rel_id
+            assert rel_id is not None, "You can't filter using dicts, except for API objects."
+    return filters
 
 def _create_object(session, api_host, resource_path, kwargs):
     """
@@ -26,20 +37,6 @@ def _create_object(session, api_host, resource_path, kwargs):
     res = session.post(path_join(api_host, resource_path), headers=headers, data=json.dumps(kwargs))
     res.raise_for_status()
     return res.headers["location"]
-
-
-def _clean_related_filters(filters):
-    """
-    :param filters: Filters that we want to search (and fix) for related objects
-    :type filters: dict
-    """
-    for key, value in list(filters.items()):  # I don't want a view here
-        if type(value) == dict:  #TODO: Need to wrap those into API objects
-            rel_id = value.get("id")
-            filters[key] = rel_id
-            assert rel_id is not None, "You can't filter using dicts, except for API objects."
-    return filters
-
 
 def _list_objects(session, api_host, resource_path, filters, _extend_list=None):
     """
