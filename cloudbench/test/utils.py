@@ -1,7 +1,8 @@
 #coding:utf-8
+import simplejson as json
+
 import six
 from six.moves import http_client
-import json
 
 if six.PY3:
     from urllib.parse import urlparse, parse_qsl

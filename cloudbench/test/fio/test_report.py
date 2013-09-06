@@ -1,5 +1,6 @@
 #coding:utf-8
 import unittest
+import decimal
 
 from cloudbench.fio.config.job import Job
 from cloudbench.fio.engine import FIOEngine
@@ -30,12 +31,12 @@ class TestSingleJobReport(unittest.TestCase):
         """
         job = Job({"rw":"read"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(1582, report.avg_iops)
+        self.assertEqual(decimal.Decimal("1582.22"), report.avg_iops)
 
         job = Job({"rw":"write"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(1567, report.avg_iops)
+        self.assertEqual(decimal.Decimal("1567"), report.avg_iops)
 
         job = Job({"rw":"rw"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(1567 + 1582, report.avg_iops)
+        self.assertEqual(decimal.Decimal("1567") + decimal.Decimal("1582.22"), report.avg_iops)

@@ -1,5 +1,5 @@
 #coding:utf-8
-import json
+import simplejson as json
 
 from cloudbench.api.util import path_join
 
