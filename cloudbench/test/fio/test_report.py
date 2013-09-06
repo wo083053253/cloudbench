@@ -1,11 +1,12 @@
 #coding:utf-8
 import unittest
+import decimal
 
 from cloudbench.fio.config.job import Job
 from cloudbench.fio.engine import FIOEngine
 from cloudbench.fio.report.single import SingleJobReport
 
-REPORT = "3;cloudbench-2.0.15;cloudbench-test;0;0;506416;25319;1582;20001;0;0;0.000000;0.000000;3;26586;420.649806;" \
+REPORT = "3;cloudbench-2.0.15;cloudbench-test;0;0;506416;25319;1582.22;20001;0;0;0.000000;0.000000;3;26586;420.649806;" \
          "529.499685;1.000000%=6;5.000000%=15;10.000000%=159;20.000000%=177;30.000000%=306;40.000000%=326;" \
          "50.000000%=334;60.000000%=342;70.000000%=358;80.000000%=386;90.000000%=580;95.000000%=1416;99.000000%=2512;" \
          "99.500000%=2864;99.900000%=4448;99.950000%=6880;99.990000%=14272;0%=0;0%=0;0%=0;3;26586;420.892105;" \
@@ -30,12 +31,12 @@ class TestSingleJobReport(unittest.TestCase):
         """
         job = Job({"rw":"read"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(1582, report.avg_iops())
+        self.assertEqual(decimal.Decimal("1582.22"), report.avg_iops)
 
         job = Job({"rw":"write"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(1567, report.avg_iops())
+        self.assertEqual(decimal.Decimal("1567"), report.avg_iops)
 
         job = Job({"rw":"rw"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(1567 + 1582, report.avg_iops())
+        self.assertEqual(decimal.Decimal("1567") + decimal.Decimal("1582.22"), report.avg_iops)

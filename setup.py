@@ -31,7 +31,7 @@ setuptools.setup(
             'cloudbench = cloudbench.cli:main',
             ],
         },
-    install_requires=["requests", "six", "lockfile", "argparse"],
+    install_requires=["requests", "six", "lockfile", "argparse", "simplejson"],
     extras_require={
         "EC2 Support": ["boto"],
         },

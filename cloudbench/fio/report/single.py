@@ -1,14 +1,19 @@
 #coding:utf-8
+import decimal
+
+from cloudbench.fio.report import REPORT_DECIMAL_Q
+
 
 def attribute_sum_factory(prop):
     """
     Returns a function that calculates an aggregate of a value across reads and writes
     """
     def fn(self):
-        value = 0
+        value = decimal.Decimal()
         for mode, is_mode in [("read", self.job.is_read), ("write", self.job.is_write)]:
             if is_mode:
-                value += int(self.report["{0}-{1}".format(mode, prop)])
+                value += decimal.Decimal(self.report["{0}-{1}".format(mode, prop)], )
+        value.quantize(REPORT_DECIMAL_Q)
         return value
     return fn
 
@@ -27,6 +32,6 @@ class SingleJobReport(object):
         self.job = job
         self.report = report
 
-    avg_iops = attribute_sum_factory("io-iops")
-    avg_lat = attribute_sum_factory("latency-usec-total-avg")
-    avg_bw = attribute_sum_factory("banwidth-avg")
+    avg_iops = property(attribute_sum_factory("io-iops"))
+    avg_lat = property(attribute_sum_factory("latency-usec-total-avg"))
+    avg_bw = property(attribute_sum_factory("banwidth-avg"))

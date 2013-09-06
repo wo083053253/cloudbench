@@ -1,6 +1,7 @@
 #coding:utf-8
-import json
+import decimal
 import unittest
+import simplejson as json
 
 from requests import Response
 
@@ -46,10 +47,15 @@ class APICreateTestCase(unittest.TestCase):
         """
         Test that the format and headers of the create request are valid
         """
-        kw = {"a":"1", "b":"2", "rel":{"id":1}}
+        kw = {"a":"1", "b":"2", "rel":{"id":1}, "dec_val": decimal.Decimal("123.98623")}
+
+        expected = {}
+        expected.update(kw)
+        expected["dec_val"] = 123.98623
+
         self.client.measurements.create(**kw)
         req = self.adapter.requests[0]
-        self.assertDictEqual(kw, json.loads(req.body))
+        self.assertDictEqual(expected, json.loads(req.body))
         self.assertEqual("application/json", req.headers[b"content-type"])
 
 

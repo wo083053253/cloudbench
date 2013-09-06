@@ -7,6 +7,7 @@ import itertools
 import lockfile.pidlockfile
 from six.moves import configparser
 
+from cloudbench.version import __version__
 from cloudbench.api.client import Client
 from cloudbench.api.auth import APIKeyAuth
 from cloudbench.cloud import Cloud
@@ -18,7 +19,7 @@ from cloudbench.utils.daemon import DaemonContext
 from cloudbench.utils.fs import check_filename
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.setLevel("DEBUG")
 
 
@@ -106,11 +107,17 @@ def identify_benchmark_volume(cloud, nobench):
 def create_api_assets(cloud, api_client, benchmark_volume):
     provider = api_client.providers.get_or_create(name=cloud.provider)
     location = api_client.locations.get_or_create(name=cloud.location, provider=provider)
+
     instance_type = api_client.abstract_assets.get_or_create(name=cloud.instance_type)
-    volume_type = api_client.abstract_assets.get_or_create(name=benchmark_volume.provider)
     instance = api_client.physical_assets.get_or_create(asset=instance_type, location=location)
-    volume = api_client.physical_assets.get_or_create(asset=volume_type, location=location)
-    return [instance, volume]
+    assets = [instance]
+
+    for asset in benchmark_volume.assets:
+        abstract_asset = api_client.abstract_assets.get_or_create(name=asset)
+        physical_asset = api_client.physical_assets.get_or_create(asset=abstract_asset, location=location)
+        assets.append(physical_asset)
+
+    return assets
 
 
 def warm_volume(base_job, fio_bin):
@@ -124,7 +131,7 @@ def report_benchmark(api_client, assets, configuration, job_report):
 
         api_client.measurements.create(
             configuration=configuration,
-            assets=[a for a in assets],
+            assets=assets,
             metric=metric,
             value=value,
         )
@@ -146,7 +153,7 @@ def run_benchmarks(api_client, assets, base_job, fio_bin, block_sizes, depths, m
             "stonewall": None,
         })
 
-        configuration = api_client.configurations.get_or_create( {
+        configuration = api_client.configurations.get_or_create(**{
                 "mode": job.mode,
                 "block_size": job.block_size.rstrip("k"),  # The API excepts an integer here.
                 "io_depth": job.io_depth
@@ -161,7 +168,7 @@ def run_benchmarks(api_client, assets, base_job, fio_bin, block_sizes, depths, m
 
 def start_benchmark(cloud, api_client, benchmark_volume, fio_bin,  block_sizes, depths, modes, size, ramp, duration):
     # Create references in the API
-    logging.debug("Creating API assets")
+    logger.debug("Creating API assets")
     assets = create_api_assets(cloud, api_client, benchmark_volume)
 
     # Prepare jobs
@@ -173,7 +180,7 @@ def start_benchmark(cloud, api_client, benchmark_volume, fio_bin,  block_sizes, 
         })
 
     # Warm up the disk
-    logging.debug("Running warm-up job")
+    logger.debug("Running warm-up job")
     warm_volume(base_job, fio_bin)
 
     # Run benchmarks
@@ -232,12 +239,13 @@ def main():
 
     api = Client(reporting_endpoint, APIKeyAuth(reporting_username, reporting_key))
 
-    logging.info("Provider: %s", cloud.provider)
-    logging.info("Location: %s", cloud.location)
-    logging.info("Instance type: %s", cloud.instance_type)
-    logging.info("Volume Type: %s, %s", volume.provider, "Persistent" if volume.persistent else "Ephemeral")
+    logger.info("Provider: %s", cloud.provider)
+    logger.info("Location: %s", cloud.location)
+    logger.info("Instance type: %s", cloud.instance_type)
+    logger.info("Volume Type: %s, %s", volume.provider, "Persistent" if volume.persistent else "Ephemeral")
 
-    logging.debug("Daemonizing")
+    logger.info("Cloudbench v{0}: starting".format(__version__))
+    logger.debug("Daemonizing")
 
     with DaemonContext(files_preserve=files_preserve, pidfile=lockfile.pidlockfile.PIDLockFile(pid_file)):
         try:
@@ -252,6 +260,7 @@ def main():
                 logger.critical("Response: %s", response.text)
 
             logger.exception("Fatal Exception")
+            logger.warning("Cloudbench v{0}: exiting".format(__version__))
             sys.exit(1)
 
 if __name__ == "__main__":

@@ -95,5 +95,33 @@ class BaseVolume(object):
         """
         raise NotImplementedError()
 
+    @property
+    def size(self):
+        """
+        The size for this Volume
+
+        :rtype: int
+        """
+        raise NotImplementedError()
+
+    def _get_extra_assets(self):
+        """
+        Extra assets for this Volume (on top of provider and size)
+
+        :rtype: list of str
+        """
+        return []
+
+    @property
+    def assets(self):
+        """
+        The list of assets for this Volume
+
+        :rtype: list of str
+        """
+        output = [self.provider, "{0} GB".format(self.size)]
+        output.extend(self._get_extra_assets())
+        return output
+
     def __repr__(self):
         return "<{0}: {1} ({2})>".format(self.__class__.__name__, self.device, "P" if self.persistent else "E")

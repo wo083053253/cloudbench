@@ -3,7 +3,6 @@ import six
 
 import boto.ec2
 
-from cloudbench.cloud import find_attachment_point
 from cloudbench.cloud.base import BaseCloud, BaseVolume
 from cloudbench.cloud.factory import make_metadata_prop
 
@@ -26,6 +25,15 @@ class EC2Volume(BaseVolume):
     def persistent(self):
         #TODO: We only return EBS volumes
         return True
+
+    @property
+    def size(self):
+        return self._volume.size
+
+    def _get_extra_assets(self):
+        if self._volume.iops is not None:
+            return ["{0} PIOPS".format(self._volume.iops)]
+        return []
 
 
 class EC2(BaseCloud):
