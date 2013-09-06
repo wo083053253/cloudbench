@@ -2,10 +2,10 @@
 import setuptools
 
 setuptools.setup(
-    name="stackbench",
+    name="cloudbench",
     version="0.2.3",
     packages=setuptools.find_packages(),
-    url="https://github.com/Scalr/stackbench",
+    url="https://github.com/Scalr/cloudbench",
     license="Apache 2.0",
     author="Thomas Orozco",
     author_email="thomas@scalr.com",
@@ -26,7 +26,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'stackbench = stackbench.cli:main',
+            'cloudbench = cloudbench.cli:main',
             ],
         },
     install_requires=["requests", "six", "lockfile", "argparse"],
