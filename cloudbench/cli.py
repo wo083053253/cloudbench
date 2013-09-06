@@ -90,7 +90,7 @@ def identify_benchmark_volume(cloud, nobench):
 
     if not acceptable_volumes:
         _devices = [vol.device for vol in persistent_volumes]
-        raise Exception("No volume to benchmark. None of {0} is acceptable", ", ".join(_devices))
+        raise Exception("No volume to benchmark. None of {0} is acceptable".format(", ".join(_devices)))
 
     if len(acceptable_volumes) > 1:
         _devices = [vol.device for vol in acceptable_volumes]

@@ -1,9 +1,11 @@
 #coding:utf-8
 import setuptools
 
+execfile("cloudbench/version.py") # Load version
+
 setuptools.setup(
     name="cloudbench",
-    version="0.3.2",
+    version=__version__,
     packages=setuptools.find_packages(),
     url="https://github.com/Scalr/cloudbench",
     license="Apache 2.0",
