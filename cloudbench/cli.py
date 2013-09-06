@@ -19,7 +19,7 @@ from cloudbench.utils.daemon import DaemonContext
 from cloudbench.utils.fs import check_filename
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.setLevel("DEBUG")
 
 
