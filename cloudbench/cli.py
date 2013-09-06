@@ -127,7 +127,7 @@ def warm_volume(base_job, fio_bin):
 
 
 def report_benchmark(api_client, assets, configuration, job_report):
-    for metric, value in [("IOPS", job_report.avg_iops), ("LAT", job_report.avg_lat), ("BW", job_report.avg_lat)]:
+    for metric, value in [("IOPS", job_report.avg_iops), ("LAT", job_report.avg_lat), ("BW", job_report.avg_bw)]:
 
         api_client.measurements.create(
             configuration=configuration,
