@@ -38,14 +38,14 @@ First, define the configuration file for the benchmark:
     modes = Comma-separated list of modes to use during benchmarking
 
 
-Next, execute stackbench and point it to your configuration file
+Next, execute cloudbench and point it to your configuration file
 
 
 .. code-block:: bash
 
-    $ stackbench -c /path/to/config/file.ini
+    $ cloudbench -c /path/to/config/file.ini
 
-By default, stackbench looks for its config file in ``/etc/stackbench.ini``
+By default, cloudbench looks for its config file in ``/etc/cloudbench.ini``
 
 
 -------
