@@ -1,7 +1,11 @@
 #coding:utf-8
 import setuptools
 
-execfile("cloudbench/version.py") # Load version
+
+with open("cloudbench/version.py") as f:
+    code = compile(f.read(), "version.py", "exec")
+    exec(code)
+
 
 setuptools.setup(
     name="cloudbench",
