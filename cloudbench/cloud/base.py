@@ -118,7 +118,7 @@ class BaseVolume(object):
         The list of assets for this Volume
 
         :rtype: list of str
-        """
+        """  #TODO: Provider maybe should depend on whether we are persistent here.
         output = [self.provider, "{0} GB".format(self.size)]
         output.extend(self._get_extra_assets())
         return output

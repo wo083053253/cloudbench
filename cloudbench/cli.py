@@ -171,6 +171,9 @@ def start_benchmark(cloud, api_client, benchmark_volume, fio_bin,  block_sizes, 
     logger.debug("Creating API assets")
     assets = create_api_assets(cloud, api_client, benchmark_volume)
 
+    for asset in assets:
+        logger.info("Found asset: %s", asset)
+
     # Prepare jobs
     base_job = BASE_LINUX_JOB + Job({
         "filename": benchmark_volume.device,

@@ -6,8 +6,7 @@ import requests
 
 from cloudbench.cloud import GCE_ENDPOINT, EC2_ENDPOINT, Cloud
 from cloudbench.cloud.exceptions import CloudAPIError
-from cloudbench.test.cloud import MockPathExists
-
+from cloudbench.test.cloud import MockPathExists, MockSubprocessCall
 from cloudbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter
 
 
@@ -57,8 +56,19 @@ class GCETestCase(unittest.TestCase):
         self.assertSequenceEqual([False, False, True],
                                  [attachment.persistent for attachment in attachments])
 
-        self.assertSequenceEqual([["GCE Disk"]] * 3, [attachment.assets for attachment in attachments])
-        #TODO: This is to be fixed once we implement size on GCE Volumes
+        disk_structure = """{
+  "creationTimestamp": "2013-09-30T01:14:23.599-07:00",
+  "id": "7422554157413993697",
+  "kind": "compute#disk",
+  "name": "scalr-disk-1a043e80",
+  "selfLink": "https://www.googleapis.com/compute/v1beta15/projects/scalr.com:scalr-labs/zones/us-central1-b/disks/scalr-disk-1a043e80",
+  "sizeGb": "15",
+  "status": "READY",
+  "zone": "https://www.googleapis.com/compute/v1beta15/projects/scalr.com:scalr-labs/zones/us-central1-b"
+}"""
+
+        with MockSubprocessCall(0, disk_structure):
+            self.assertEqual(["GCE Disk", "15 GB"], attachments[2].assets)
 
         self.assertEqual(0, len(adapter.responses))
 

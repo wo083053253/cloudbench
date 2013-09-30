@@ -1,8 +1,16 @@
 #coding:utf-8
 import string
+import subprocess
+import json
+import logging
+
+from cloudbench.cloud import CloudUnavailableError
 
 from cloudbench.cloud.base import BaseCloud, BaseVolume
 from cloudbench.cloud.factory import make_metadata_prop
+
+
+logger = logging.getLogger(__name__)
 
 
 GCE_DISK_PERSISTENT = "PERSISTENT"
@@ -29,6 +37,20 @@ class GCEVolume(BaseVolume):
     @property
     def provider(self):
         return "GCE Disk" if self.persistent else "GCE Scratch"
+
+    @property
+    def size(self):
+        #TODO: This is somewhat slow becasue we don't pass the project / zone
+        name = self._vol_info["deviceName"]
+
+        args = ["gcutil", "--format=json", "getdisk", name]
+        proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if proc.wait():
+            raise CloudUnavailableError("Could not access volume info for %s", name)
+        stdout, stderr = proc.communicate()
+
+        disk = json.loads(stdout)
+        return int(disk["sizeGb"])
 
 
 class GCE(BaseCloud):
