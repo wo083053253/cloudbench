@@ -58,7 +58,7 @@ def Cloud(session=None):
     :rtype: cloudbench.cloud.base.BaseCloud
     """
     if session is None:
-        session = requests.Session()
+        session = requests  #TODO: Understand why using requests.session() breaks here.
     provider_name = _get_provider(session)
     provider = _get_provider_class(PROVIDER_CLASSES[provider_name])
     return provider(session)

@@ -254,15 +254,17 @@ def main():
         try:
             start_benchmark(cloud, api, volume, fio_bin, block_sizes, depths, modes, size, ramp, duration)
         except Exception as e:
-            logger.critical("An error occurred")
+            logger.critical("An error occurred: %s", e)
             response = getattr(e, "response", None)
+
+            logger.exception("Fatal Exception")
 
             if response is not None:
                 logger.critical("HTTP Error")
+                logger.critical("URL: %s", response.request.url)
                 logger.critical("Status: %s %s", response.status_code, response.reason)
                 logger.critical("Response: %s", response.text)
 
-            logger.exception("Fatal Exception")
             logger.warning("Cloudbench v{0}: exiting".format(__version__))
             sys.exit(1)
 
