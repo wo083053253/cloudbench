@@ -56,6 +56,6 @@ class APICreateTestCase(unittest.TestCase):
         self.client.measurements.create(**kw)
         req = self.adapter.requests[0]
         self.assertDictEqual(expected, json.loads(req.body))
-        self.assertEqual("application/json", req.headers[b"content-type"])
+        self.assertEqual("application/json", req.headers["content-type"])
 
 
