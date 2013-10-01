@@ -246,6 +246,7 @@ def main():
     logger.info("Location: %s", cloud.location)
     logger.info("Instance type: %s", cloud.instance_type)
     logger.info("Volume Type: %s, %s", volume.provider, "Persistent" if volume.persistent else "Ephemeral")
+    logger.info("Volume Device: %", volume.device)
 
     logger.info("Cloudbench v{0}: starting".format(__version__))
     logger.debug("Daemonizing")

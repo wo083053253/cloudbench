@@ -21,8 +21,6 @@ def translate_attachment_point(index):
 
 
 class GCEVolume(BaseVolume):
-    provider = "GCE Disk"
-
     def __init__(self, vol_info):
         self._vol_info = vol_info
 
