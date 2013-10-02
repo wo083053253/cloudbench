@@ -1,5 +1,6 @@
 #coding:utf-8
 import simplejson as json
+from cloudbench.api.exceptions import DuplicateObject
 
 from cloudbench.api.util import path_join
 
@@ -23,6 +24,17 @@ def _clean_related_filters(filters):
             assert rel_id is not None, "You can't filter using dicts, except for API objects."
     return filters
 
+def _test_for_duplicate(response):
+    """
+    Raise an error if the response is erroring due to an attempted duplicate object
+    We test this at the API level so that we bypass the retries which are on HTTP errors.
+    """
+    duplicate_message = "already exists"
+    for elem, message in response.json().items():
+        for error in message.get("__all__", []):
+            if duplicate_message in error:
+                raise DuplicateObject(response)
+
 def _create_object(session, api_host, resource_path, kwargs):
     """
     Create a new object in the API
@@ -35,6 +47,8 @@ def _create_object(session, api_host, resource_path, kwargs):
     """
     headers = {"Content-Type": "application/json"}
     res = session.post(path_join(api_host, resource_path), headers=headers, data=json.dumps(kwargs))
+    if res.status_code == 400:
+        _test_for_duplicate(res)
     res.raise_for_status()
     return res.headers["location"]
 

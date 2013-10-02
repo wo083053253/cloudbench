@@ -1,10 +1,13 @@
 #coding:utf-8
 import unittest
+import six
+
 from requests import Response
 
 from cloudbench.api.client import Client
 from cloudbench.api.exceptions import APIError
 from cloudbench.test.api import MockTimeSleep
+from cloudbench.test.api.test_create import OBJ_RESPONSE
 from cloudbench.test.api.test_get import BASE_RESPONSE, OBJ_1_PARTIAL
 
 from cloudbench.test.utils import TEST_ENDPOINT, RepeatingTestAdapter, PredictableTestAdapter, make_json_response
@@ -72,3 +75,27 @@ class ErrorTestCase(unittest.TestCase):
             self.assertRaises(APIError, client.measurements.list)
 
         self.assertEqual([retry_wait, retry_wait], mock_sleep.calls)
+
+    def test_race_condition(self):
+        self.client = Client(TEST_ENDPOINT)  # We'll never hit that anyway
+
+        response_data = dict(BASE_RESPONSE)
+
+        absent = make_json_response(response_data)
+
+        exists = Response()
+        exists.status_code = 400
+        exists.reason = "BAD REQUEST"
+        exists._content = six.b('{"configuration": {"__all__": ["Configuration with this I/O Mode, Block Size and I/O Depth already exists."]}}')
+
+        response_data = dict(BASE_RESPONSE)
+        response_data["objects"] = [OBJ_1_PARTIAL]
+        response_data["total_count"] = 1
+        success_response = make_json_response(response_data)
+
+        self.adapter = PredictableTestAdapter([absent, exists, success_response, make_json_response(OBJ_RESPONSE)])
+        self.client._session.mount(TEST_ENDPOINT, self.adapter)
+
+        ret = self.client.configurations.get_or_create()
+        self.assertDictEqual(OBJ_RESPONSE, ret)
+        self.assertEqual(4, len(self.adapter.requests))

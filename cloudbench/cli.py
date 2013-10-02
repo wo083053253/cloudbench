@@ -235,6 +235,8 @@ def main():
     reporting_username = config.get("reporting", "username")
     reporting_key = config.get("reporting", "apikey")
 
+    #TODO: Retries
+
 
     # Final setup options before we daemonize, to let the user catch misconfiguration errors
     cloud = Cloud()

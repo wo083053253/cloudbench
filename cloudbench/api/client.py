@@ -6,7 +6,7 @@ from functools import wraps
 import requests
 from requests.exceptions import HTTPError
 
-from cloudbench.api.exceptions import NoSuchObject, MultipleObjectsReturned, APIError
+from cloudbench.api.exceptions import NoSuchObject, MultipleObjectsReturned, APIError, DuplicateObject
 from cloudbench.api.factory import _get_by_url, _list_objects, _create_object
 from cloudbench.api.util import path_join, _normalize_api_path
 
@@ -79,7 +79,10 @@ class ResourceHandler(object):
         try:
             return self.get(**filters)
         except NoSuchObject:
-            return self.create(**filters)
+            try:
+                return self.create(**filters)
+            except DuplicateObject:
+                return self.get(**filters)
 
     @property
     def retry_max(self):
