@@ -23,10 +23,10 @@ class CLIAPITestCase(unittest.TestCase):
         assets = create_api_assets(cloud, api_client, benchmark_volumes)
 
         self.assertEqual(1, len(api_client.providers.objects))
-        provider = api_client.providers.objects.values()[0]
+        provider = list(api_client.providers.objects.values())[0]
 
         self.assertEqual(1, len(api_client.locations.objects))
-        location = api_client.locations.objects.values()[0]
+        location = list(api_client.locations.objects.values())[0]
         self.assertIs(provider, location["provider"])
 
         self.assertEqual(4, len(api_client.abstract_assets.objects))  # Instance, Disk, Size 1, Size 2
