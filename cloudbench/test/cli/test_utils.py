@@ -25,6 +25,3 @@ class CLITestCase(unittest.TestCase):
             vols = identify_benchmark_volumes(cloud, nobench)
 
         self.assertEqual([vol3, vol4], vols)
-
-
-

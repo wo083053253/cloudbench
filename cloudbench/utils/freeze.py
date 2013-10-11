@@ -14,7 +14,6 @@ def unfreeze_dict(obj):
     if isinstance(obj, tuple):
         if (FROZEN_TAG, True) in obj:
             out = dict((k, unfreeze_dict(v)) for k, v in obj)
-            del out[FROZEN_TAG]  #TODO: Doesn't work
-            print "RETURNING", out
+            del out[FROZEN_TAG]
             return out
     return obj

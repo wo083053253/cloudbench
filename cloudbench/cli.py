@@ -7,7 +7,6 @@ import itertools
 
 import lockfile.pidlockfile
 from six.moves import configparser
-from cloudbench.utils.freeze import freeze_dict, unfreeze_dict
 
 from cloudbench.version import __version__
 from cloudbench.api.client import Client
@@ -19,6 +18,7 @@ from cloudbench.fio.engine import FIOEngine
 from cloudbench.fio.report.single import SingleJobReport
 from cloudbench.utils import fs
 from cloudbench.utils.daemon import DaemonContext
+from cloudbench.utils.freeze import freeze_dict, unfreeze_dict
 
 
 logger = logging.getLogger(__name__)

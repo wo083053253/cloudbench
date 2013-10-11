@@ -56,9 +56,6 @@ class TestCloud(BaseCloud):
         return self._attachments
 
 
-
-
-
 class TestAPIResource(object):
     def __init__(self):
         self.objects = {}
