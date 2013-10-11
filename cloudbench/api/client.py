@@ -112,6 +112,7 @@ class Client(object):
         self.physical_assets = ResourceHandler(self, "physicalasset")
         self.configurations = ResourceHandler(self, "configuration")
         self.measurements = ResourceHandler(self, "measurement")
+        self.measurement_assets = ResourceHandler(self, "measurementasset")
 
     @property
     def base_api_path(self):

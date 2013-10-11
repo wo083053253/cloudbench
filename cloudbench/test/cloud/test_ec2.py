@@ -6,8 +6,8 @@ import requests
 
 from cloudbench.cloud import Cloud, GCE_ENDPOINT, EC2_ENDPOINT
 
-from cloudbench.test.cloud import boto_importable, MockPathExists
-from cloudbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter
+from cloudbench.test.cloud import boto_importable
+from cloudbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter, MockPathExists
 
 
 @unittest.skipUnless(boto_importable, "boto is not importable")

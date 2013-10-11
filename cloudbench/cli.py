@@ -1,4 +1,5 @@
 #coding:utf-8
+import collections
 import sys
 import argparse
 import logging
@@ -6,6 +7,7 @@ import itertools
 
 import lockfile.pidlockfile
 from six.moves import configparser
+from cloudbench.utils.freeze import freeze_dict, unfreeze_dict
 
 from cloudbench.version import __version__
 from cloudbench.api.client import Client
@@ -15,8 +17,8 @@ from cloudbench.fio.config.job import Job
 from cloudbench.fio.config.library import BASE_LINUX_JOB, BASE_FILL_JOB
 from cloudbench.fio.engine import FIOEngine
 from cloudbench.fio.report.single import SingleJobReport
+from cloudbench.utils import fs
 from cloudbench.utils.daemon import DaemonContext
-from cloudbench.utils.fs import check_filename
 
 
 logger = logging.getLogger(__name__)
@@ -74,7 +76,7 @@ def may_bench(nobench, device):
     return True
 
 
-def identify_benchmark_volume(cloud, nobench):
+def identify_benchmark_volumes(cloud, nobench):
     """
     Identify the volume we are going to benchmark
 
@@ -83,8 +85,8 @@ def identify_benchmark_volume(cloud, nobench):
     :param nobench: List of device prefixes not to benchmark
     :type nobench: list of str
 
-    :returns: The Volume to benchmark
-    :rtype: cloudbench.cloud.base.BaseVolume
+    :returns: The volumes to benchmark
+    :rtype: list of cloudbench.cloud.base.BaseVolume
     """
     persistent_volumes = [volume for volume in cloud.attachments if volume.persistent]
     acceptable_volumes = [volume for volume in persistent_volumes if may_bench(nobench, volume.device)]
@@ -93,18 +95,16 @@ def identify_benchmark_volume(cloud, nobench):
         _devices = [vol.device for vol in persistent_volumes]
         raise Exception("No volume to benchmark. None of {0} is acceptable".format(", ".join(_devices)))
 
-    if len(acceptable_volumes) > 1:
-        _devices = [vol.device for vol in acceptable_volumes]
-        raise Exception("Too many volumes: {0}".format(", ".join(_devices)))
+    for benchmark_volume in acceptable_volumes:
+        fs.check_filename(benchmark_volume.device)
 
-    # Found the volume, move on!
-    benchmark_volume = acceptable_volumes[0]
-    check_filename(benchmark_volume.device)
-
-    return benchmark_volume
+    return acceptable_volumes
 
 
-def create_api_assets(cloud, api_client, benchmark_volume):
+def create_api_assets(cloud, api_client, benchmark_volumes):
+    """
+    Create our API assets, and return a list of PhysicalAsset, Quantity
+    """
     provider = api_client.providers.get_or_create(name=cloud.provider)
     location = api_client.locations.get_or_create(name=cloud.location, provider=provider)
 
@@ -112,12 +112,15 @@ def create_api_assets(cloud, api_client, benchmark_volume):
     instance = api_client.physical_assets.get_or_create(asset=instance_type, location=location)
     assets = [instance]
 
-    for asset in benchmark_volume.assets:
-        abstract_asset = api_client.abstract_assets.get_or_create(name=asset)
-        physical_asset = api_client.physical_assets.get_or_create(asset=abstract_asset, location=location)
-        assets.append(physical_asset)
+    for benchmark_volume in benchmark_volumes:
+        for asset in benchmark_volume.assets:
+            abstract_asset = api_client.abstract_assets.get_or_create(name=asset)
+            physical_asset = api_client.physical_assets.get_or_create(asset=abstract_asset, location=location)
+            assets.append(physical_asset)
 
-    return assets
+    frozen_assets = [freeze_dict(asset) for asset in assets]
+    assets_with_count = collections.Counter(frozen_assets).most_common()
+    return [(unfreeze_dict(asset), quantity) for asset, quantity in assets_with_count]
 
 
 def warm_volume(base_job, fio_bin):
@@ -129,17 +132,17 @@ def warm_volume(base_job, fio_bin):
 def report_benchmark(api_client, assets, configuration, job_report):
     for metric, value in [("IOPS", job_report.avg_iops), ("LAT", job_report.avg_lat), ("BW", job_report.avg_bw)]:
 
-        api_client.measurements.create(
+        measurement = api_client.measurements.create(
             configuration=configuration,
-            assets=assets,
             metric=metric,
             value=value,
         )
 
-        logger.debug("Reported")
-        logger.debug("Assets: %s", ", ".join([asset["asset"]["name"] for asset in assets]))
-        logger.debug("Metric: %s", metric)
-        logger.debug("Value: %s", value)
+        for asset, quantity in assets:
+            api_client.measurement_assets.create(asset=asset, measurement=measurement, quantity=quantity)
+
+        logger.debug("Reported: %s = %s", metric, value)
+        logger.debug("Assets: %s", ", ".join([asset["asset"]["name"] for asset, quantity in assets]))
 
 
 def run_benchmarks(api_client, assets, base_job, fio_bin, block_sizes, depths, modes):
@@ -166,18 +169,18 @@ def run_benchmarks(api_client, assets, base_job, fio_bin, block_sizes, depths, m
         report_benchmark(api_client, assets, configuration, job_report)
 
 
-def start_benchmark(cloud, api_client, benchmark_volume, fio_bin,  block_sizes, depths, modes, size, ramp, duration):
+def start_benchmark(cloud, api_client, benchmark_volumes, fio_bin,  block_sizes, depths, modes, size, ramp, duration):
     # Create references in the API
     logger.debug("Creating API assets")
-    assets = create_api_assets(cloud, api_client, benchmark_volume)
+    assets = create_api_assets(cloud, api_client, benchmark_volumes)
 
     for asset in assets:
         logger.info("Found asset: %s", asset)
 
     # Prepare jobs
     base_job = BASE_LINUX_JOB + Job({
-        "filename": benchmark_volume.device,
-        "size": size,
+        "filename": ":".join(vol.device for vol in benchmark_volumes),
+        "size": size,  #TODO: Multiply?
         "ramp_time": ramp,
         "runtime": duration,
         })
@@ -240,22 +243,23 @@ def main():
 
     # Final setup options before we daemonize, to let the user catch misconfiguration errors
     cloud = Cloud()
-    volume = identify_benchmark_volume(cloud, no_bench)
+    benchmark_volumes = identify_benchmark_volumes(cloud, no_bench)
 
     api = Client(reporting_endpoint, APIKeyAuth(reporting_username, reporting_key))
 
     logger.info("Provider: %s", cloud.provider)
     logger.info("Location: %s", cloud.location)
     logger.info("Instance type: %s", cloud.instance_type)
-    logger.info("Volume Type: %s, %s", volume.provider, "Persistent" if volume.persistent else "Ephemeral")
-    logger.info("Volume Device: %s", volume.device)
+    logger.info("Number of volumes: %s", len(benchmark_volumes))
+    for benchmark_volume in benchmark_volumes:
+        logger.info("%s: %s, %s", benchmark_volume.device, benchmark_volume.provider, "Persistent" if benchmark_volume.persistent else "Ephemeral")
 
     logger.info("Cloudbench v{0}: starting".format(__version__))
     logger.debug("Daemonizing")
 
     with DaemonContext(files_preserve=files_preserve, pidfile=lockfile.pidlockfile.PIDLockFile(pid_file)):
         try:
-            start_benchmark(cloud, api, volume, fio_bin, block_sizes, depths, modes, size, ramp, duration)
+            start_benchmark(cloud, api, benchmark_volumes, fio_bin, block_sizes, depths, modes, size, ramp, duration)
         except Exception as e:
             logger.critical("An error occurred: %s", e)
             response = getattr(e, "response", None)

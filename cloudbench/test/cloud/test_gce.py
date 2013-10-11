@@ -6,8 +6,8 @@ import requests
 
 from cloudbench.cloud import GCE_ENDPOINT, EC2_ENDPOINT, Cloud
 from cloudbench.cloud.exceptions import CloudAPIError
-from cloudbench.test.cloud import MockPathExists, MockSubprocessCall
-from cloudbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter
+from cloudbench.test.cloud import MockSubprocessCall
+from cloudbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter, MockPathExists
 
 
 class GCETestCase(unittest.TestCase):
