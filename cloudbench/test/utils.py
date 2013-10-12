@@ -1,8 +1,10 @@
 #coding:utf-8
+import os.path
 import simplejson as json
 
 import six
 from six.moves import http_client
+from cloudbench.utils import fs
 
 if six.PY3:
     from urllib.parse import urlparse, parse_qsl
@@ -135,3 +137,41 @@ def extract_qs(url):
         return arg, None
 
     return dict(map(normalize, res))
+
+
+class MockPathExists(object):
+    def __init__(self, existing_paths):
+        self.existing_paths = existing_paths
+        self._exists = None
+
+    def __call__(self, path):
+        return path in self.existing_paths
+
+    def __enter__(self):
+        self._exists = os.path.exists
+        os.path.exists = self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        # Accept the exception params, but don't do anything about them
+        if self._exists is not None:
+            os.path.exists = self._exists
+        self._exists = None
+
+
+class MockCheckFilename(object):
+    def __init__(self, valid_filenames):
+        self.valid_filenames = valid_filenames
+        self._check_filename = None
+
+    def __call__(self, path):
+        return path in self.valid_filenames
+
+    def __enter__(self):
+        self._check_filename = os.path.exists
+        fs.check_filename = self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        # Accept the exception params, but don't do anything about them
+        if self._check_filename is not None:
+            fs.check_filename = self._check_filename
+        self._check_filename = None

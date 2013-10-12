@@ -8,6 +8,9 @@ class APIError(Exception):
         if self.response is not None:
             return self.response.text
 
+    def __str__(self):
+        return repr(self)
+
 class NoSuchObject(APIError):
     pass
 

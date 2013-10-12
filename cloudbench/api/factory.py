@@ -31,8 +31,16 @@ def _test_for_duplicate(response):
     """
     duplicate_message = "already exists"
     for elem, message in response.json().items():
-        for error in message.get("__all__", []):
-            if duplicate_message in error:
+        error_messages = []
+
+        try:
+            for error in message.get("__all__", []):
+                error_messages.append(error)
+        except AttributeError:  # Depending on the error, we may not get a dict, but only a string.
+            error_messages.append(message)
+
+        for error_message in error_messages:
+            if duplicate_message in error_message:
                 raise DuplicateObject(response)
 
 def _create_object(session, api_host, resource_path, kwargs):
