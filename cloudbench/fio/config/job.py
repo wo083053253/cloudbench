@@ -79,7 +79,6 @@ class Job(ConfigInterface):
                 return out
         return DEFAULT_BLOCK_SIZE
 
-
     @property
     def io_depth(self):
         return self._job_config.get("iodepth", DEFAULT_IO_DEPTH)

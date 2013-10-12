@@ -157,9 +157,9 @@ def run_benchmarks(api_client, assets, base_job, fio_bin, block_sizes, depths, m
         })
 
         configuration = api_client.configurations.get_or_create(**{
-                "mode": job.mode,
-                "block_size": job.block_size.rstrip("k"),  # The API excepts an integer here.
-                "io_depth": job.io_depth
+            "mode": job.mode,
+            "block_size": job.block_size.rstrip("k"),  # The API expects an integer here.
+            "io_depth": job.io_depth
         })
 
         engine = FIOEngine(job, fio_bin)
@@ -180,7 +180,7 @@ def start_benchmark(cloud, api_client, benchmark_volumes, fio_bin,  block_sizes,
     # Prepare jobs
     base_job = BASE_LINUX_JOB + Job({
         "filename": ":".join(vol.device for vol in benchmark_volumes),
-        "size": size,  #TODO: Multiply?
+        "time_based": None,
         "ramp_time": ramp,
         "runtime": duration,
         })
