@@ -50,7 +50,6 @@ def _create_object(session, api_host, resource_path, kwargs):
     :param session: A session object to use to make the request
     :param api_host: The host where the API is located
     :param resource_path: The path where the objects are created
-    :param resource: The resource to create
     :param kwargs: The arguments to use to create the object
     """
     headers = {"Content-Type": "application/json"}
@@ -59,6 +58,11 @@ def _create_object(session, api_host, resource_path, kwargs):
         _test_for_duplicate(res)
     res.raise_for_status()
     return res.headers["location"]
+
+def _update_object(session, api_host, obj):
+    headers = {"Content-Type": "application/json"}
+    res = session.patch(path_join(api_host, obj["resource_uri"]), headers=headers, data=json.dumps(obj))
+    res.raise_for_status()
 
 def _list_objects(session, api_host, resource_path, filters, _extend_list=None):
     """

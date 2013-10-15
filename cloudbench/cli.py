@@ -136,10 +136,14 @@ def report_benchmark(api_client, assets, configuration, job_report):
             configuration=configuration,
             metric=metric,
             value=value,
+            committed = False,
         )
 
         for asset, quantity in assets:
             api_client.measurement_assets.create(asset=asset, measurement=measurement, quantity=quantity)
+
+        measurement["committed"] = True
+        api_client.update(measurement)
 
         logger.debug("Reported: %s = %s", metric, value)
         logger.debug("Assets: %s", ", ".join([asset["asset"]["name"] for asset, quantity in assets]))

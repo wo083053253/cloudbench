@@ -7,7 +7,7 @@ import requests
 from requests.exceptions import HTTPError
 
 from cloudbench.api.exceptions import NoSuchObject, MultipleObjectsReturned, APIError, DuplicateObject
-from cloudbench.api.factory import _get_by_url, _list_objects, _create_object
+from cloudbench.api.factory import _get_by_url, _list_objects, _create_object, _update_object
 from cloudbench.api.util import path_join, _normalize_api_path
 
 
@@ -118,3 +118,7 @@ class Client(object):
     def base_api_path(self):
         return path_join(self._api_path, self._api_version)
 
+    @api_wrapper
+    def update(self, obj):
+        logger.debug("UPDATE: %s", obj["resource_uri"])
+        _update_object(self._session, self.host, obj)

@@ -1,4 +1,5 @@
 #coding:utf-8
+import copy
 from cloudbench.cloud.base import BaseVolume, BaseCloud
 from cloudbench.utils.freeze import freeze_dict
 
@@ -60,16 +61,19 @@ class TestAPIResource(object):
     def __init__(self):
         self.objects = {}
 
+    def _from_objects(self, key):
+        return copy.deepcopy(self.objects[key])
+
     def create(self, **kwargs):
         key = freeze_dict(kwargs)
         self.objects[key] = kwargs
-        return self.objects[key]
+        return self._from_objects(key)
 
     def get_or_create(self, **kwargs):
         key = freeze_dict(kwargs)
         if key not in self.objects:
             return self.create(**kwargs)
-        return self.objects[key]
+        return self._from_objects(key)
 
 
 class TestAPIClient(object):
@@ -84,6 +88,11 @@ class TestAPIClient(object):
         self.configurations = TestAPIResource()
         self.measurements = TestAPIResource()
         self.measurement_assets = TestAPIResource()
+
+        self.updates = []
+
+    def update(self, obj):
+        self.updates.append(obj)
 
 
 class TestJobReport(object):

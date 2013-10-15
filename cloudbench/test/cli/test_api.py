@@ -27,7 +27,7 @@ class CLIAPITestCase(unittest.TestCase):
 
         self.assertEqual(1, len(api_client.locations.objects))
         location = list(api_client.locations.objects.values())[0]
-        self.assertIs(provider, location["provider"])
+        self.assertEqual(provider, location["provider"])
 
         self.assertEqual(4, len(api_client.abstract_assets.objects))  # Instance, Disk, Size 1, Size 2
 
@@ -63,8 +63,9 @@ class CLIAPITestCase(unittest.TestCase):
 
         self.assertEqual(3, len(api_client.measurements.objects))
         for measurement in api_client.measurements.objects.values():
-            self.assertIs(configuration, measurement["configuration"])
+            self.assertEqual(configuration, measurement["configuration"])
             self.assertEqual(measurement["metric"].lower(), measurement["value"])
+            self.assertFalse(measurement["committed"])
 
 
         # Check we have the right number of measurement assets
@@ -83,3 +84,10 @@ class CLIAPITestCase(unittest.TestCase):
         self.assertEqual(3, len(count))  # 3 metrics
         for _, count in count.most_common():
             self.assertEqual(2, count)  # 2 assets per metric
+
+        # Check that the initial write isn't committed
+
+        # Check that we have a commit
+        self.assertEqual(3, len(api_client.updates))
+        for update in api_client.updates:
+            self.assertTrue(update["committed"])
