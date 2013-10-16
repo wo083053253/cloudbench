@@ -34,6 +34,9 @@ DEFAULT_FILE_SIZE = "10G"
 DEFAULT_RAMP_TIME = "15"
 DEFAULT_DURATION = "600"
 
+DEFAULT_RETRY_MAX = 0
+DEFAULT_RETRY_WAIT = 0
+
 
 
 def setup_logging(log_file):
@@ -217,7 +220,9 @@ def main():
         "nobench": "",
         "size": DEFAULT_FILE_SIZE,
         "ramp": DEFAULT_RAMP_TIME,
-        "duration": DEFAULT_DURATION
+        "duration": DEFAULT_DURATION,
+        "retry_max": DEFAULT_RETRY_MAX,
+        "retry_wait": DEFAULT_RETRY_WAIT,
     })
     config.add_section("environment")
     config.add_section("general")
@@ -241,6 +246,8 @@ def main():
     reporting_endpoint = config.get("reporting", "endpoint")
     reporting_username = config.get("reporting", "username")
     reporting_key = config.get("reporting", "apikey")
+    reporting_retry_max = config.get("reporting", "retry_max")
+    reporting_retry_wait = config.get("reporting", "retry_wait")
 
     #TODO: Retries
 
@@ -249,7 +256,8 @@ def main():
     cloud = Cloud()
     benchmark_volumes = identify_benchmark_volumes(cloud, no_bench)
 
-    api = Client(reporting_endpoint, APIKeyAuth(reporting_username, reporting_key))
+    api = Client(reporting_endpoint, APIKeyAuth(reporting_username, reporting_key),
+                 reporting_retry_max, reporting_retry_wait)
 
     logger.info("Provider: %s", cloud.provider)
     logger.info("Location: %s", cloud.location)

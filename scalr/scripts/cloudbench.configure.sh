@@ -11,6 +11,8 @@ nobench = $CLOUDBENCH_NOBENCH
 endpoint = $CLOUDBENCH_ENDPOINT
 username = $CLOUDBENCH_USERNAME
 apikey = $CLOUDBENCH_API_KEY
+retry_max = $CLOUDBENCH_RETRY_MAX
+retry_wait = $CLOUDBENCH_RETRY_WAIT
 
 [benchmarks]
 blocksizes = $CLOUDBENCH_BLOCK_SIZES
