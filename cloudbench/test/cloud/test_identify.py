@@ -1,12 +1,13 @@
 #coding:utf-8
 import unittest
+
 import requests
 
-from cloudbench.cloud import EC2_ENDPOINT, GCE_ENDPOINT, Cloud
+from cloudbench.cloud import Cloud
 from cloudbench.cloud.exceptions import CloudUnavailableError
 
 from cloudbench.test.cloud import boto_importable
-from cloudbench.test.utils import RepeatingTestAdapter, UnreachableTestAdapter
+from cloudbench.test.utils import RepeatingTestAdapter, UnreachableTestAdapter, MockSession
 
 
 class IdentifyCloudTestCase(unittest.TestCase):
@@ -19,10 +20,11 @@ class IdentifyCloudTestCase(unittest.TestCase):
         response.status_code = 200
         adapter = RepeatingTestAdapter(response)
 
-        self.session.mount(EC2_ENDPOINT, adapter)
-        self.session.mount(GCE_ENDPOINT, UnreachableTestAdapter())
+        self.session.mount("http://169.254.169.254", adapter)
+        self.session.mount("http://metadata", UnreachableTestAdapter())
 
-        cloud = Cloud(self.session)
+        with MockSession(self.session):
+            cloud = Cloud()
 
         self.assertEqual("EC2", cloud.__class__.__name__)
 
@@ -31,15 +33,17 @@ class IdentifyCloudTestCase(unittest.TestCase):
         response.status_code = 200
         adapter = RepeatingTestAdapter(response)
 
-        self.session.mount(GCE_ENDPOINT, adapter)
-        self.session.mount(EC2_ENDPOINT, UnreachableTestAdapter())
+        self.session.mount("http://metadata", adapter)
+        self.session.mount("http://169.254.169.254", UnreachableTestAdapter())
 
-        cloud = Cloud(self.session)
+        with MockSession(self.session):
+            cloud = Cloud()
 
         self.assertEqual("GCE", cloud.__class__.__name__)
 
     def test_not_found(self):
-        self.session.mount(EC2_ENDPOINT, UnreachableTestAdapter())
-        self.session.mount(GCE_ENDPOINT, UnreachableTestAdapter())
+        self.session.mount("http://169.254.169.254", UnreachableTestAdapter())
+        self.session.mount("http://metadata", UnreachableTestAdapter())
 
-        self.assertRaises(CloudUnavailableError, Cloud, self.session)
+        with MockSession(self.session):
+            self.assertRaises(CloudUnavailableError, Cloud)

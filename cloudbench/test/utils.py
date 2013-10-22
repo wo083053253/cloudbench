@@ -1,5 +1,6 @@
 #coding:utf-8
 import os.path
+import requests
 import simplejson as json
 
 import six
@@ -175,3 +176,24 @@ class MockCheckFilename(object):
         if self._check_filename is not None:
             fs.check_filename = self._check_filename
         self._check_filename = None
+
+
+class MockSession(object):
+    def __init__(self, session):
+        self.session = session
+        self._session_cls = None
+
+    def __call__(self):
+        return self.session
+
+    def __enter__(self):
+        self._session_cls = requests.Session
+        requests.Session = self
+        requests.session = self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        # Accept the exception params, but don't do anything about them
+        if self._session_cls is not None:
+            requests.Session = self._session_cls
+            requests.session = self._session_cls
+        self._session_cls = None

@@ -1,8 +1,8 @@
 #coding:utf-8
 import unittest
 
-from cloudbench.cloud import find_attachment_point
 from cloudbench.cloud.exceptions import VolumeNotFoundError
+from cloudbench.cloud.utils import find_attachment_point
 
 from cloudbench.test.utils import MockPathExists
 from cloudbench.utils.freeze import freeze_dict, unfreeze_dict

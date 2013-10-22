@@ -4,10 +4,10 @@ import unittest
 
 import requests
 
-from cloudbench.cloud import Cloud, GCE_ENDPOINT, EC2_ENDPOINT
+from cloudbench.cloud import Cloud
 
 from cloudbench.test.cloud import boto_importable
-from cloudbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter, MockPathExists
+from cloudbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter, MockPathExists, MockSession
 
 
 @unittest.skipUnless(boto_importable, "boto is not importable")
@@ -18,7 +18,7 @@ class EC2TestCase(unittest.TestCase):
         self.AttachmentSet = AttachmentSet
 
         self.session = requests.Session()
-        self.session.mount(GCE_ENDPOINT, UnreachableTestAdapter())
+        self.session.mount("http://metadata", UnreachableTestAdapter())
         self.ec2_response = requests.Response()
         self.ec2_response.status_code = 200
 
@@ -37,9 +37,10 @@ class EC2TestCase(unittest.TestCase):
 
 
         adapter = PredictableTestAdapter([self.ec2_response, response1, response2, response2])
-        self.session.mount(EC2_ENDPOINT, adapter)
+        self.session.mount("http://169.254.169.254", adapter)
 
-        cloud = Cloud(self.session)
+        with MockSession(self.session):
+            cloud = Cloud()
 
         self.assertEqual("m1.large", cloud.instance_type)
         self.assertEqual("us-east-1a", cloud.availability_zone)
@@ -84,8 +85,11 @@ class EC2TestCase(unittest.TestCase):
 
         self.ec2_response._content = "i-1234"
         adapter = RepeatingTestAdapter(self.ec2_response)
-        self.session.mount(EC2_ENDPOINT, adapter)
-        cloud = Cloud(self.session)
+        self.session.mount("http://169.254.169.254", adapter)
+
+        with MockSession(self.session):
+            cloud = Cloud()
+
         cloud._conn = MockConn(volumes)
 
         attachments = cloud.attachments

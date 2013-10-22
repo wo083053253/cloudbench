@@ -1,15 +1,10 @@
 #coding:utf-8
-from cloudbench.cloud import find_attachment_point
+import requests
+
+from cloudbench.cloud.utils import find_attachment_point
 
 
 class BaseCloud(object):
-    def __init__(self, session):
-        """
-        :param session:
-        :type session: requests.sessions.Session
-        """
-        self.session = session
-
     @property
     def metadata_server(self):
         """
@@ -54,8 +49,24 @@ class BaseCloud(object):
         """
         raise NotImplementedError()
 
+    @classmethod
+    def is_present(cls):
+        raise NotImplementedError()
+
     def __repr__(self):
         return "<{0}>".format(self.__class__.__name__)
+
+
+class BaseMetadataServerCloud(BaseCloud):
+    @classmethod
+    def is_present(cls):
+        try:
+            session = requests.Session()
+            res = session.get(cls.metadata_server, timeout=1)
+            res.raise_for_status()
+        except (requests.ConnectionError, requests.HTTPError) as e:
+            return False
+        return True
 
 
 class BaseVolume(object):
