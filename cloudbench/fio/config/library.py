@@ -16,12 +16,12 @@ BASE_FILL_JOB = Job({
     "rw": "write",
     "bs": "2M",
     "refill_buffers": None,
+    "time_based": None,
 })
 
 
-BENCH_JOB = Job({
+BASE_BENCH_JOB = Job({
     "ioscheduler": "deadline",
-    "cpumask": "1",  #TODO ????
+    "cpumask": "1",
     "time_based": None,
-    #"rate_iops": "2000",
 })

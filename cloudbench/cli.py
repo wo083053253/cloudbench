@@ -13,7 +13,7 @@ from cloudbench.api.client import Client
 from cloudbench.api.auth import APIKeyAuth
 from cloudbench.cloud import Cloud
 from cloudbench.fio.config.job import Job
-from cloudbench.fio.config.library import BASE_LINUX_JOB, BASE_FILL_JOB
+from cloudbench.fio.config.library import BASE_LINUX_JOB, BASE_FILL_JOB, BASE_BENCH_JOB
 from cloudbench.fio.engine import FIOEngine
 from cloudbench.fio.report.single import SingleJobReport
 from cloudbench.utils import fs
@@ -156,7 +156,7 @@ def run_benchmarks(api_client, assets, base_job, fio_bin, block_sizes, depths, m
     for i, (bs, depth, mode) in enumerate(itertools.product(block_sizes, depths, modes)):
         logger.info("Launching job. Block Size:%s, I/O Depth:%s, I/O Mode:%s", bs, depth, mode)
 
-        job = base_job + Job({
+        job = base_job + BASE_BENCH_JOB + Job({
             "bs": bs,
             "iodepth": depth,
             "rw": mode,
@@ -187,10 +187,9 @@ def start_benchmark(cloud, api_client, benchmark_volumes, fio_bin,  block_sizes,
     # Prepare jobs
     base_job = BASE_LINUX_JOB + Job({
         "filename": ":".join(vol.device for vol in benchmark_volumes),
-        "time_based": None,
         "ramp_time": ramp,
         "runtime": duration,
-        })
+    })
 
     # Warm up the disk
     logger.debug("Running warm-up job")
