@@ -4,7 +4,6 @@ import time
 from functools import wraps
 
 import requests
-from requests.exceptions import HTTPError
 
 from cloudbench.api.exceptions import NoSuchObject, MultipleObjectsReturned, APIError, DuplicateObject
 from cloudbench.api.factory import _get_by_url, _list_objects, _create_object, _update_object
@@ -28,7 +27,7 @@ def api_wrapper(method):
         for n_failures in counter():
             try:
                 return method(self, *args, **kwargs)
-            except HTTPError as e:
+            except (requests.HTTPError, requests.Timeout, requests.ConnectionError) as e:
                 response = None
                 if hasattr(e, "response"):
                     response = e.response

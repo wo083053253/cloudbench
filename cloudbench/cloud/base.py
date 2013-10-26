@@ -64,7 +64,7 @@ class BaseMetadataServerCloud(BaseCloud):
             session = requests.Session()
             res = session.get(cls.metadata_server, timeout=1)
             res.raise_for_status()
-        except (requests.ConnectionError, requests.HTTPError) as e:
+        except (requests.ConnectionError, requests.Timeout, requests.HTTPError) as e:
             return False
         return True
 
