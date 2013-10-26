@@ -19,6 +19,7 @@ from cloudbench.fio.report.single import SingleJobReport
 from cloudbench.utils import fs
 from cloudbench.utils.daemon import DaemonContext
 from cloudbench.utils.freeze import freeze_dict, unfreeze_dict
+from cloudbench.utils.math import block_size_in_kb
 
 
 logger = logging.getLogger(__name__)
@@ -165,7 +166,7 @@ def run_benchmarks(api_client, assets, base_job, fio_bin, block_sizes, depths, m
 
         configuration = api_client.configurations.get_or_create(**{
             "mode": job.mode,
-            "block_size": job.block_size.rstrip("k"),  # The API expects an integer here.
+            "block_size": block_size_in_kb(job.block_size),
             "io_depth": job.io_depth
         })
 

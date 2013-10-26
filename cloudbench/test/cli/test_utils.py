@@ -2,9 +2,11 @@
 import unittest
 
 from cloudbench.cli import may_bench, identify_benchmark_volumes
+from cloudbench.utils.freeze import unfreeze_dict, freeze_dict
+from cloudbench.utils.math import block_size_in_kb, InvalidBlockSize
+
 from cloudbench.test.cli.utils import TestVolume, TestCloud
 from cloudbench.test.utils import MockCheckFilename
-from cloudbench.utils.freeze import unfreeze_dict, freeze_dict
 
 
 class CLITestCase(unittest.TestCase):
@@ -32,3 +34,19 @@ class FreezeTestCase(unittest.TestCase):
     def test_freeze(self):
         test_dict = {"a": "b", "c": {"d": "e"}, "f": {"g": {"h": "i"}}}
         self.assertEqual(test_dict, unfreeze_dict(freeze_dict(test_dict)))
+        
+
+class UnitTestCase(unittest.TestCase):
+    def test_units(self):
+        self.assertEqual(10, block_size_in_kb("10k"))
+        self.assertEqual(10, block_size_in_kb("10kb"))
+        self.assertEqual(10240, block_size_in_kb("10m"))
+        self.assertEqual(10240, block_size_in_kb("10mb"))
+
+        self.assertEqual(10, block_size_in_kb("10K"))
+        self.assertEqual(10, block_size_in_kb("10KB"))
+        self.assertEqual(10240, block_size_in_kb("10M"))
+        self.assertEqual(10240, block_size_in_kb("10MB"))
+
+        self.assertRaises(InvalidBlockSize, block_size_in_kb, "1")
+        self.assertRaises(InvalidBlockSize, block_size_in_kb, "10ZB")
