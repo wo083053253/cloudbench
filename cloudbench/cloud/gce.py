@@ -74,7 +74,7 @@ class GCEVolume(BaseVolume):
         args = ["gcutil", "--format=json", "getdisk", name]
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if proc.wait():
-            raise CloudUnavailableError("Could not access volume info for %s", name)
+            raise CloudUnavailableError("Could not access volume info for %s" % name)
         stdout, stderr = proc.communicate()
 
         disk = json.loads(stdout)

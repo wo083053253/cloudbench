@@ -7,7 +7,8 @@ from cloudbench.cloud.exceptions import VolumeNotFoundError, CloudUnavailableErr
 
 PROVIDERS = [
     "cloudbench.cloud.ec2.EC2",
-    "cloudbench.cloud.gce.GCE"
+    "cloudbench.cloud.gce.GCE",
+    "cloudbench.cloud.rackspace.RackspaceOpenCloud",
 ]
 
 

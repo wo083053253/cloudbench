@@ -15,9 +15,9 @@ class EC2(BaseMetadataServerCloud):
     instance_type = make_metadata_prop("instance-type")
     availability_zone = make_metadata_prop("placement/availability-zone")
     _instance_id = make_metadata_prop("instance-id")
-    _conn = None
 
     def __init__(self):
+        self._conn = None
         self.session = requests.Session()
 
     @property

@@ -6,8 +6,8 @@ import requests
 from cloudbench.cloud import Cloud
 from cloudbench.cloud.exceptions import CloudUnavailableError
 
-from cloudbench.test.cloud import boto_importable
-from cloudbench.test.utils import RepeatingTestAdapter, UnreachableTestAdapter, MockSession
+from cloudbench.test.cloud import boto_importable, pyrax_importable
+from cloudbench.test.utils import RepeatingTestAdapter, UnreachableTestAdapter, MockSession, MockSubprocessCall
 
 
 class IdentifyCloudTestCase(unittest.TestCase):
@@ -23,10 +23,20 @@ class IdentifyCloudTestCase(unittest.TestCase):
         self.session.mount("http://169.254.169.254", adapter)
         self.session.mount("http://metadata", UnreachableTestAdapter())
 
-        with MockSession(self.session):
+        with MockSession(self.session), MockSubprocessCall(0, "Not Rackspace"):
             cloud = Cloud()
 
         self.assertEqual("EC2", cloud.__class__.__name__)
+
+    @unittest.skipUnless(pyrax_importable, "pyrax is not importable")
+    def test_rackspace(self):
+        self.session.mount("http://169.254.169.254", UnreachableTestAdapter())
+        self.session.mount("http://metadata", UnreachableTestAdapter())
+
+        with MockSession(self.session), MockSubprocessCall(0, "Rackspace"):
+            cloud = Cloud()
+
+        self.assertEqual("RackspaceOpenCloud", cloud.__class__.__name__)
 
     def test_gce(self):
         response = requests.Response()
@@ -36,7 +46,7 @@ class IdentifyCloudTestCase(unittest.TestCase):
         self.session.mount("http://metadata", adapter)
         self.session.mount("http://169.254.169.254", UnreachableTestAdapter())
 
-        with MockSession(self.session):
+        with MockSession(self.session), MockSubprocessCall(0, "Not Rackspace"):
             cloud = Cloud()
 
         self.assertEqual("GCE", cloud.__class__.__name__)
@@ -45,5 +55,8 @@ class IdentifyCloudTestCase(unittest.TestCase):
         self.session.mount("http://169.254.169.254", UnreachableTestAdapter())
         self.session.mount("http://metadata", UnreachableTestAdapter())
 
-        with MockSession(self.session):
+        with MockSession(self.session), MockSubprocessCall(0, "Not Rackspace"):
+            self.assertRaises(CloudUnavailableError, Cloud)
+
+        with MockSession(self.session), MockSubprocessCall(1, "Rackspace"):
             self.assertRaises(CloudUnavailableError, Cloud)

@@ -6,13 +6,6 @@ from cloudbench.cloud.utils import find_attachment_point
 
 class BaseCloud(object):
     @property
-    def metadata_server(self):
-        """
-        :rtype: str
-        """
-        raise NotImplementedError()
-
-    @property
     def instance_type(self):
         """
         :rtype: str
@@ -58,6 +51,13 @@ class BaseCloud(object):
 
 
 class BaseMetadataServerCloud(BaseCloud):
+    @property
+    def metadata_server(self):
+        """
+        :rtype: str
+        """
+        raise NotImplementedError()
+
     @classmethod
     def is_present(cls):
         try:
