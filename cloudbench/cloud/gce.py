@@ -3,17 +3,47 @@ import string
 import subprocess
 import json
 import logging
+import requests
 
 from cloudbench.cloud import CloudUnavailableError
 
-from cloudbench.cloud.base import BaseCloud, BaseVolume
+from cloudbench.cloud.base import BaseVolume, BaseMetadataServerCloud
 from cloudbench.cloud.factory import make_metadata_prop
-
 
 logger = logging.getLogger(__name__)
 
 
 GCE_DISK_PERSISTENT = "PERSISTENT"
+
+
+class GCE(BaseMetadataServerCloud):
+    provider = "GCE"
+
+    metadata_server = "http://metadata/computeMetadata/v1beta1"
+    fq_instance_type = make_metadata_prop("instance/machine-type")
+    fq_availability_zone = make_metadata_prop("instance/zone")
+
+    def __init__(self):
+        self.session = requests.Session()
+
+    @property
+    def instance_type(self):
+        return self.fq_instance_type.rsplit("/", 1)[1]
+
+    @property
+    def availability_zone(self):
+        return self.fq_availability_zone.rsplit("/", 1)[1]
+
+    @property
+    def location(self):
+        return self.availability_zone[:-2]
+
+    @property
+    def attachments(self):
+        url = "/".join([self.metadata_server, "instance", "disks/",]) + "?recursive=true"
+        res = self.session.get(url)
+        volumes_info = res.json()
+        return [GCEVolume(vol_info) for vol_info in volumes_info]
 
 
 def translate_attachment_point(index):
@@ -44,36 +74,10 @@ class GCEVolume(BaseVolume):
         args = ["gcutil", "--format=json", "getdisk", name]
         proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if proc.wait():
-            raise CloudUnavailableError("Could not access volume info for %s", name)
+            raise CloudUnavailableError("Could not access volume info for %s" % name)
         stdout, stderr = proc.communicate()
 
         disk = json.loads(stdout)
         return int(disk["sizeGb"])
 
-
-class GCE(BaseCloud):
-    provider = "GCE"
-
-    metadata_server = "http://metadata/computeMetadata/v1beta1"
-    fq_instance_type = make_metadata_prop("instance/machine-type")
-    fq_availability_zone = make_metadata_prop("instance/zone")
-
-    @property
-    def instance_type(self):
-        return self.fq_instance_type.rsplit("/", 1)[1]
-
-    @property
-    def availability_zone(self):
-        return self.fq_availability_zone.rsplit("/", 1)[1]
-
-    @property
-    def location(self):
-        return self.availability_zone[:-2]
-
-    @property
-    def attachments(self):
-        url = "/".join([self.metadata_server, "instance", "disks/",]) + "?recursive=true"
-        res = self.session.get(url)
-        volumes_info = res.json()
-        return [GCEVolume(vol_info) for vol_info in volumes_info]
 

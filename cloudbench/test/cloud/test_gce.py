@@ -4,16 +4,15 @@ import six
 
 import requests
 
-from cloudbench.cloud import GCE_ENDPOINT, EC2_ENDPOINT, Cloud
+from cloudbench.cloud import Cloud
 from cloudbench.cloud.exceptions import CloudAPIError
-from cloudbench.test.cloud import MockSubprocessCall
-from cloudbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter, MockPathExists
+from cloudbench.test.utils import UnreachableTestAdapter, PredictableTestAdapter, RepeatingTestAdapter, MockPathExists, MockSession, MockSubprocessCall
 
 
 class GCETestCase(unittest.TestCase):
     def setUp(self):
         self.session = requests.Session()
-        self.session.mount(EC2_ENDPOINT, UnreachableTestAdapter())
+        self.session.mount("http://169.254.169.254", UnreachableTestAdapter())
         self.ec2_response = requests.Response()
         self.ec2_response.status_code = 200
 
@@ -38,9 +37,10 @@ class GCETestCase(unittest.TestCase):
 
 
         adapter = PredictableTestAdapter([self.ec2_response, response1, response2, response2, response3])
-        self.session.mount(GCE_ENDPOINT, adapter)
+        self.session.mount("http://metadata", adapter)
 
-        cloud = Cloud(self.session)
+        with MockSession(self.session):
+            cloud = Cloud()
 
         self.assertEqual("n1-standard-1-d", cloud.instance_type)
         self.assertEqual("us-central1-b", cloud.availability_zone)
@@ -74,11 +74,16 @@ class GCETestCase(unittest.TestCase):
 
     def test_error_propagation(self):
         response = requests.Response()
+        response.status_code = 200
+        adapter = RepeatingTestAdapter(response)
+        self.session.mount("http://metadata", adapter)
+
+        with MockSession(self.session):
+            cloud = Cloud()
+
+        response = requests.Response()
         response.status_code = 500
         adapter = RepeatingTestAdapter(response)
-
-        self.session.mount(GCE_ENDPOINT, adapter)
-
-        cloud = Cloud(self.session)
+        self.session.mount("http://metadata", adapter)
 
         self.assertRaises(CloudAPIError, getattr, cloud, "location")

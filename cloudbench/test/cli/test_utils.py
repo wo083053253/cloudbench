@@ -4,6 +4,7 @@ import unittest
 from cloudbench.cli import may_bench, identify_benchmark_volumes
 from cloudbench.test.cli.utils import TestVolume, TestCloud
 from cloudbench.test.utils import MockCheckFilename
+from cloudbench.utils.freeze import unfreeze_dict, freeze_dict
 
 
 class CLITestCase(unittest.TestCase):
@@ -25,3 +26,9 @@ class CLITestCase(unittest.TestCase):
             vols = identify_benchmark_volumes(cloud, nobench)
 
         self.assertEqual([vol3, vol4], vols)
+
+
+class FreezeTestCase(unittest.TestCase):
+    def test_freeze(self):
+        test_dict = {"a": "b", "c": {"d": "e"}, "f": {"g": {"h": "i"}}}
+        self.assertEqual(test_dict, unfreeze_dict(freeze_dict(test_dict)))

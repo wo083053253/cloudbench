@@ -38,6 +38,7 @@ setuptools.setup(
     install_requires=["requests", "six", "lockfile", "argparse", "simplejson"],
     extras_require={
         "EC2 Support": ["boto"],
+        "Rackspace Support": ["pyrax"],
         },
     setup_requires=["nose"],
     tests_require=["tox", "nose"],
