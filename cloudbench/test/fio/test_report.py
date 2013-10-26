@@ -69,11 +69,6 @@ class TestSingleJobReport(unittest.TestCase):
         engine = FIOEngine(dummy_job)
         self.output = engine.report(REPORT)
 
-    def test_aggregation(self):
-        job = Job({"rw":"rw"})
-        report = SingleJobReport(job, self.output[0])
-        self.assertEqual(decimal.Decimal("965"), report.avg_iops)
-
     def test_iops(self):
         job = Job({"rw":"read"})
         report = SingleJobReport(job, self.output[0])
@@ -83,20 +78,32 @@ class TestSingleJobReport(unittest.TestCase):
         report = SingleJobReport(job, self.output[0])
         self.assertEqual(decimal.Decimal("478"), report.avg_iops)
 
+        job = Job({"rw":"rw"})
+        report = SingleJobReport(job, self.output[0])
+        self.assertEqual(decimal.Decimal("965"), report.avg_iops)
+
     def test_bw(self):
         job = Job({"rw": "read"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(decimal.Decimal("7384.650000"), report.avg_bw)
+        self.assertEqual(decimal.Decimal("7384.65000"), report.avg_bw)
 
         job = Job({"rw": "write"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(decimal.Decimal("7649.631579"), report.avg_bw)
+        self.assertEqual(decimal.Decimal("7649.63158"), report.avg_bw)
+
+        job = Job({"rw": "rw"})
+        report = SingleJobReport(job, self.output[0])
+        self.assertEqual(decimal.Decimal("15034.28158"), report.avg_bw)
 
     def test_latency(self):
         job = Job({"rw": "read"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(decimal.Decimal("720.603324"), report.avg_lat)
+        self.assertEqual(decimal.Decimal("720.60332"), report.avg_lat)
 
         job = Job({"rw": "write"})
         report = SingleJobReport(job, self.output[0])
-        self.assertEqual(decimal.Decimal("1349.806263"), report.avg_lat)
+        self.assertEqual(decimal.Decimal("1349.80626"), report.avg_lat)
+
+        job = Job({"rw": "rw"})
+        report = SingleJobReport(job, self.output[0])
+        self.assertEqual(decimal.Decimal("1035.20479"), report.avg_lat)
