@@ -46,6 +46,7 @@ class RackspaceOpenCloud(BaseCloud):
         if self._conn is None:
             pyrax.set_setting("identity_type", "rackspace")
             pyrax.set_credentials(os.environ["RACKSPACE_USERNAME"], os.environ["RACKSPACE_API_KEY"])
+            pyrax.set_setting("verify_ssl", False)
             self._conn = pyrax  # We love globals, don't we?!
         return self._conn
 
@@ -70,7 +71,7 @@ class RackspaceOpenCloud(BaseCloud):
 
 
 class RackspaceOpenCloudVolume(BaseVolume):
-    provider = "Cinder"
+    provider = "RackspaceCinder"
 
     def __init__(self, volume):
         """
