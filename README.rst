@@ -48,8 +48,24 @@ Next, execute cloudbench and point it to your configuration file
 By default, cloudbench looks for its config file in ``/etc/cloudbench.ini``
 
 
+--------------
+Use with Scalr
+--------------
+
+For simplified ease of use, it's possible to use Cloudbench with `Scalr`_.
+
+Scalr can:
+
++ Provision and attach volumes (on any platform)
++ Install, Configure, and Launch Cloudbench
++ Bring infrastructure up and down at regular intervals to periodically run benchmarks
+
+
 -------
 License
 -------
 
 See LICENSE.
+
+
+.. _Scalr: http://www.scalr.com

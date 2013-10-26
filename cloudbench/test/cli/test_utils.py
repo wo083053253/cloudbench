@@ -34,7 +34,7 @@ class FreezeTestCase(unittest.TestCase):
     def test_freeze(self):
         test_dict = {"a": "b", "c": {"d": "e"}, "f": {"g": {"h": "i"}}}
         self.assertEqual(test_dict, unfreeze_dict(freeze_dict(test_dict)))
-        
+
 
 class UnitTestCase(unittest.TestCase):
     def test_units(self):
