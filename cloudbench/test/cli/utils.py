@@ -96,7 +96,9 @@ class TestAPIClient(object):
 
 
 class TestJobReport(object):
-    def __init__(self, iops, latency, bandwidth):
-        self.avg_iops = iops
-        self.avg_lat = latency
-        self.avg_bw = bandwidth
+    def __init__(self):
+        self.avg_iops = "iops"
+        self.avg_lat = "lat"
+        self.stddev_lat = "lat sd"
+        self.avg_bw = "bw"
+        self.stddev_bw = "bw sd"
