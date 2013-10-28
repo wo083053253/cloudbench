@@ -253,25 +253,24 @@ def main():
     reporting_retry_wait = int(config.get("reporting", "retry_wait"))
 
 
-    # Final setup options before we daemonize, to let the user catch misconfiguration errors
-    cloud = Cloud()
-    benchmark_volumes = identify_benchmark_volumes(cloud, no_bench)
-
-    api = Client(reporting_endpoint, APIKeyAuth(reporting_username, reporting_key),
-                 reporting_retry_max, reporting_retry_wait)
-
-    logger.info("Provider: %s", cloud.provider)
-    logger.info("Location: %s", cloud.location)
-    logger.info("Instance type: %s", cloud.instance_type)
-    logger.info("Number of volumes: %s", len(benchmark_volumes))
-    for benchmark_volume in benchmark_volumes:
-        logger.info("%s: %s, %s", benchmark_volume.device, benchmark_volume.provider, "Persistent" if benchmark_volume.persistent else "Ephemeral")
-
     logger.info("Cloudbench v{0}: starting".format(__version__))
-    logger.debug("Daemonizing")
 
     with DaemonContext(files_preserve=files_preserve, pidfile=lockfile.pidlockfile.PIDLockFile(pid_file)):
         try:
+            cloud = Cloud()
+            benchmark_volumes = identify_benchmark_volumes(cloud, no_bench)
+
+            api = Client(reporting_endpoint, APIKeyAuth(reporting_username, reporting_key),
+                         reporting_retry_max, reporting_retry_wait)
+
+            logger.info("Provider: %s", cloud.provider)
+            logger.info("Location: %s", cloud.location)
+            logger.info("Instance type: %s", cloud.instance_type)
+            logger.info("Number of volumes: %s", len(benchmark_volumes))
+            for benchmark_volume in benchmark_volumes:
+                logger.info("%s: %s, %s", benchmark_volume.device, benchmark_volume.provider, "Persistent"
+                            if benchmark_volume.persistent else "Ephemeral")
+
             start_benchmark(cloud, api, benchmark_volumes, fio_bin, block_sizes, depths, modes, size, ramp, duration)
         except Exception as e:
             logger.critical("An error occurred: %s", e)
