@@ -100,6 +100,26 @@ class ErrorTestCase(unittest.TestCase):
 
         self.assertFalse(all([wait_time == retry_wait for wait_time in mock_sleep.calls]))
 
+    def test_negative_retry(self):
+        retry_max = 100
+        retry_wait = 0
+        retry_range = 10
+
+        client = Client(TEST_ENDPOINT, retry_max=retry_max, retry_wait=retry_wait, retry_range=retry_range)
+        err_response = Response()
+        err_response.status_code = 500
+        err_response.reason = "INTERNAL SERVER ERROR"
+
+        adapter = RepeatingTestAdapter(err_response)
+        client._session.mount(TEST_ENDPOINT, adapter)
+
+        mock_sleep = MockTimeSleep()
+
+        with mock_sleep:
+            self.assertRaises(APIError, client.measurements.list)
+
+        for wait_time in mock_sleep.calls:
+            self.assertGreaterEqual(wait_time, 0)
 
     def test_race_condition(self):
         self.client = Client(TEST_ENDPOINT)  # We'll never hit that anyway
