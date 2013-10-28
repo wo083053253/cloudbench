@@ -3,12 +3,10 @@ import string
 import subprocess
 import json
 import logging
-import requests
 
 from cloudbench.cloud import CloudUnavailableError
-
 from cloudbench.cloud.base import BaseVolume, BaseMetadataServerCloud
-from cloudbench.cloud.factory import make_metadata_getter
+
 
 logger = logging.getLogger(__name__)
 
@@ -21,12 +19,13 @@ class GCE(BaseMetadataServerCloud):
 
     metadata_server = "http://metadata/computeMetadata/v1beta1"
 
-    def __init__(self):
-        self.session = requests.Session()
+    @property
+    def fq_instance_type(self):
+        return self._get_metadata_path("instance/machine-type")
 
-    fq_instance_type = property(make_metadata_getter("instance/machine-type"))
-
-    fq_availability_zone = property(make_metadata_getter("instance/zone"))
+    @property
+    def fq_availability_zone(self):
+        return self._get_metadata_path("instance/zone")
 
     @property
     def instance_type(self):
