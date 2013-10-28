@@ -18,17 +18,31 @@ class SingleJobReport(object):
         self.job = job
         self.report = report
 
+    # IOPS are "shared" on a mixed workload
+    # So we use the sum
     @property
     def avg_iops(self):
-        return self._property_sum("io-iops")  # IOPS are shared on mixed workloads
+        return self._property_sum("io-iops")
 
+    # Latency isn't "shared" on a mixed workload
+    # So we use the average
     @property
     def avg_lat(self):
-        return self._property_average("latency-usec-total-avg")  # Latency isn't "shared" on a mixed workload
+        return self._property_average("latency-usec-total-avg")
 
     @property
+    def stddev_lat(self):
+        return self._property_average("latency-usec-total-stddev")
+
+    # Bandwidth is "shared" on a mixed workload
+    # So we use the sum
+    @property
     def avg_bw(self):
-        return self._property_sum("bandwidth-avg")  # Bandwidth is shared on mixed workloads
+        return self._property_sum("bandwidth-avg")
+
+    @property
+    def stddev_bw(self):
+        return self._property_sum("bandwidth-stddev")
 
     def _io_modes(self):
         return [mode for mode, is_mode in [("read", self.job.is_read), ("write", self.job.is_write)] if is_mode]

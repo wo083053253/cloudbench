@@ -57,11 +57,11 @@ class CLIAPITestCase(unittest.TestCase):
         asset2 = api_client.physical_assets.create(asset={"name": "asset2"})
         assets = [(asset1, 1), (asset2, 2)]
 
-        job_report = TestJobReport("iops", "lat", "bw")
+        job_report = TestJobReport()
 
         report_benchmark(api_client, assets, configuration, job_report)
 
-        self.assertEqual(3, len(api_client.measurements.objects))
+        self.assertEqual(5, len(api_client.measurements.objects))
         for measurement in api_client.measurements.objects.values():
             self.assertEqual(configuration, measurement["configuration"])
             self.assertEqual(measurement["metric"].lower(), measurement["value"])
@@ -69,7 +69,7 @@ class CLIAPITestCase(unittest.TestCase):
 
 
         # Check we have the right number of measurement assets
-        self.assertEqual(6, len(api_client.measurement_assets.objects))
+        self.assertEqual(10, len(api_client.measurement_assets.objects))
 
         # Check the quantity is correct
         assets_with_quantity = [(measurement_asset["asset"]["asset"]["name"], measurement_asset["quantity"])
@@ -81,13 +81,13 @@ class CLIAPITestCase(unittest.TestCase):
         for measurement_asset in api_client.measurement_assets.objects.values():
             count[measurement_asset["measurement"]["metric"]] += 1
 
-        self.assertEqual(3, len(count))  # 3 metrics
+        self.assertEqual(5, len(count))  # 5 different metrics
         for _, count in count.most_common():
             self.assertEqual(2, count)  # 2 assets per metric
 
         # Check that the initial write isn't committed
 
         # Check that we have a commit
-        self.assertEqual(3, len(api_client.updates))
+        self.assertEqual(5, len(api_client.updates))
         for update in api_client.updates:
             self.assertTrue(update["committed"])
