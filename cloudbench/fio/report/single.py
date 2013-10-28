@@ -30,6 +30,10 @@ class SingleJobReport(object):
     def avg_bw(self):
         return self._property_sum("bandwidth-avg")  # Bandwidth is shared on mixed workloads
 
+    @property
+    def stddev_bw(self):
+        return self._property_sum("bandwidth-stddev")  # We use the sum we can compute dispersion by doing stddev / avg
+
     def _io_modes(self):
         return [mode for mode, is_mode in [("read", self.job.is_read), ("write", self.job.is_write)] if is_mode]
 

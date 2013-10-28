@@ -11,7 +11,7 @@ def get_format(section):
 _FORMAT_IO = ["total-kb", "bandwidth-kbps", "iops", "runtime-ms"]
 _FORMAT_LATENCY = ["min", "max", "avg", "stddev"]
 _FORMAT_PERCENTILE = ["pct-{0}".format(i) for i in range(20)]
-_FORMAT_BANDWIDTH = ["min", "max", "aggregate", "avg", "deviation"]
+_FORMAT_BANDWIDTH = ["min", "max", "aggregate", "avg", "stddev"]
 _FORMAT_CPU = ["user", "system", "context-switches", "major-page-faults", "minor-page-faults"]
 _FORMAT_IO_DEPTH = ["<=1", "2", "4", "8", "16", "32", ">=64"]
 _FORMAT_LATENCY_DISTRIBUTION_MICROSECONDS = ["<=2", "4", "10", "20", "50", "100", "250", "500", "750", "1000"]

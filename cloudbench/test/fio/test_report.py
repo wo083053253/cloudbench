@@ -82,7 +82,7 @@ class TestSingleJobReport(unittest.TestCase):
         report = SingleJobReport(job, self.output[0])
         self.assertEqual(decimal.Decimal("965"), report.avg_iops)
 
-    def test_bw(self):
+    def test_avg_bw(self):
         job = Job({"rw": "read"})
         report = SingleJobReport(job, self.output[0])
         self.assertEqual(decimal.Decimal("7384.65000"), report.avg_bw)
@@ -94,6 +94,20 @@ class TestSingleJobReport(unittest.TestCase):
         job = Job({"rw": "rw"})
         report = SingleJobReport(job, self.output[0])
         self.assertEqual(decimal.Decimal("15034.28158"), report.avg_bw)
+
+    def test_stddev_bw(self):
+        job = Job({"rw": "read"})
+        report = SingleJobReport(job, self.output[0])
+        self.assertEqual(decimal.Decimal("1846.61937"), report.stddev_bw)
+
+        job = Job({"rw": "write"})
+        report = SingleJobReport(job, self.output[0])
+        self.assertEqual(decimal.Decimal("552.43373"), report.stddev_bw)
+
+        job = Job({"rw": "rw"})
+        report = SingleJobReport(job, self.output[0])
+        self.assertEqual(decimal.Decimal("2399.05309"), report.stddev_bw)
+
 
     def test_latency(self):
         job = Job({"rw": "read"})
