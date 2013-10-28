@@ -8,7 +8,7 @@ import requests
 from cloudbench.cloud import CloudUnavailableError
 
 from cloudbench.cloud.base import BaseVolume, BaseMetadataServerCloud
-from cloudbench.cloud.factory import make_metadata_prop
+from cloudbench.cloud.factory import make_metadata_getter
 
 logger = logging.getLogger(__name__)
 
@@ -20,11 +20,13 @@ class GCE(BaseMetadataServerCloud):
     provider = "GCE"
 
     metadata_server = "http://metadata/computeMetadata/v1beta1"
-    fq_instance_type = make_metadata_prop("instance/machine-type")
-    fq_availability_zone = make_metadata_prop("instance/zone")
 
     def __init__(self):
         self.session = requests.Session()
+
+    fq_instance_type = property(make_metadata_getter("instance/machine-type"))
+
+    fq_availability_zone = property(make_metadata_getter("instance/zone"))
 
     @property
     def instance_type(self):

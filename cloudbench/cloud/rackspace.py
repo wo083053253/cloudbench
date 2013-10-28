@@ -17,10 +17,10 @@ def get_xenstore_key(key):
     return stdout.decode("utf-8").strip()
 
 
-def make_xenstore_property(key):
+def make_xenstore_getter(key):
     def method(self):
         return get_xenstore_key(key)
-    return property(method)
+    return method
 
 
 class RackspaceOpenCloud(BaseCloud):
@@ -30,9 +30,9 @@ class RackspaceOpenCloud(BaseCloud):
         self._conn = None
         self._instance = None
 
-    location = make_xenstore_property("vm-data/provider_data/region")
+    location = property(make_xenstore_getter("vm-data/provider_data/region"))
 
-    _hostname = make_xenstore_property("vm-data/hostname")
+    _hostname = property(make_xenstore_getter("vm-data/hostname"))
 
     @property
     def instance(self):
