@@ -39,8 +39,9 @@ def api_wrapper(method):
                 if n_failures >= self.retry_max:
                     raise APIError(response)
 
-                logger.info("Retrying API call in %s seconds", self.retry_wait)
-                time.sleep(self.retry_wait + self.retry_range * (1 - 2 * random.random()))
+                retry_in = self.retry_wait + self.retry_range * (1 - 2 * random.random())
+                logger.info("Retrying API call in %s seconds", retry_in)
+                time.sleep(retry_in)
 
     return wrapper
 
