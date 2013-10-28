@@ -1,24 +1,31 @@
 #coding:utf-8
 import six
 
-import requests
 import boto.ec2
 
 from cloudbench.cloud.base import BaseVolume, BaseMetadataServerCloud
-from cloudbench.cloud.factory import make_metadata_prop
 
 
 class EC2(BaseMetadataServerCloud):
     provider = "EC2"
 
     metadata_server = "http://169.254.169.254/latest/meta-data"
-    instance_type = make_metadata_prop("instance-type")
-    availability_zone = make_metadata_prop("placement/availability-zone")
-    _instance_id = make_metadata_prop("instance-id")
 
     def __init__(self):
+        super(EC2, self).__init__()
         self._conn = None
-        self.session = requests.Session()
+
+    @property
+    def instance_type(self):
+        return self._get_metadata_path("instance-type")
+
+    @property
+    def availability_zone(self):
+        return self._get_metadata_path("placement/availability-zone")
+
+    @property
+    def _instance_id(self):
+        return self._get_metadata_path("isntance-id")
 
     @property
     def conn(self):

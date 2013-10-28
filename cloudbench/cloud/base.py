@@ -1,5 +1,6 @@
 #coding:utf-8
 import requests
+from cloudbench.cloud.exceptions import CloudAPIError
 
 from cloudbench.cloud.utils import find_attachment_point
 
@@ -51,12 +52,22 @@ class BaseCloud(object):
 
 
 class BaseMetadataServerCloud(BaseCloud):
+    def __init__(self):
+        self.session = requests.Session()
+
     @property
     def metadata_server(self):
         """
         :rtype: str
         """
         raise NotImplementedError()
+
+    def _get_metadata_path(self, path):
+        url = "/".join([self.metadata_server, path])
+        res = self.session.get(url)
+        if res.status_code != 200:
+            raise CloudAPIError(res)
+        return res.text
 
     @classmethod
     def is_present(cls):
