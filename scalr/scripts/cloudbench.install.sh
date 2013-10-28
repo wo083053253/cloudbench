@@ -5,7 +5,7 @@ set -o nounset
 apt-get update
 apt-get install -y python-setuptools python-pip curl bzip2 build-essential libaio-dev
 
-pip uninstall --yes python-novaclient
+pip uninstall --yes python-novaclient || true
 pip install lockfile boto pyrax cloudbench
 
 FIO_BUILD=/tmp/$$-build/
