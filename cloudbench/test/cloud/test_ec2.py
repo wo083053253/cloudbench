@@ -34,7 +34,7 @@ class EC2TestCase(unittest.TestCase):
         response2.status_code = 200
         response2._content = six.b("us-east-1a")
         response2.encoding = "utf-8"
-
+        # TODO: Add instance ID, and test request paths.
 
         adapter = PredictableTestAdapter([self.ec2_response, response1, response2, response2])
         self.session.mount("http://169.254.169.254", adapter)

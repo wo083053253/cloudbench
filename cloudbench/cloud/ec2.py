@@ -25,7 +25,7 @@ class EC2(BaseMetadataServerCloud):
 
     @property
     def _instance_id(self):
-        return self._get_metadata_path("isntance-id")
+        return self._get_metadata_path("instance-id")
 
     @property
     def conn(self):
