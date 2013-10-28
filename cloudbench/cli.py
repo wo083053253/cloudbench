@@ -246,10 +246,10 @@ def main():
     reporting_endpoint = config.get("reporting", "endpoint")
     reporting_username = config.get("reporting", "username")
     reporting_key = config.get("reporting", "apikey")
-    reporting_retry_max = config.get("reporting", "retry_max")
-    reporting_retry_wait = config.get("reporting", "retry_wait")
 
-    #TODO: Retries
+    # Those two may fail, but that's fine: we haven't daemonized yet.
+    reporting_retry_max = int(config.get("reporting", "retry_max"))
+    reporting_retry_wait = int(config.get("reporting", "retry_wait"))
 
 
     # Final setup options before we daemonize, to let the user catch misconfiguration errors
