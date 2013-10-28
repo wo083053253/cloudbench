@@ -22,7 +22,7 @@ from cloudbench.utils.freeze import freeze_dict, unfreeze_dict
 from cloudbench.utils.math import block_size_in_kb
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 logger.setLevel("DEBUG")
 
 
