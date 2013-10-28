@@ -1,6 +1,7 @@
 #coding:utf-8
 import logging
 import time
+import random
 from functools import wraps
 
 import requests
@@ -39,7 +40,7 @@ def api_wrapper(method):
                     raise APIError(response)
 
                 logger.info("Retrying API call in %s seconds", self.retry_wait)
-                time.sleep(self.retry_wait)
+                time.sleep(self.retry_wait + self.retry_range * (1 - 2 * random.random()))
 
     return wrapper
 
@@ -91,15 +92,20 @@ class ResourceHandler(object):
     def retry_wait(self):
         return self.client.retry_wait
 
+    @property
+    def retry_range(self):
+        return self.client.retry_range
+
 
 class Client(object):
     _api_path = "api"
     _api_version = "v1"
 
-    def __init__(self, host, auth=None, retry_max=0, retry_wait=0):
+    def __init__(self, host, auth=None, retry_max=0, retry_wait=0, retry_range=0):
         self.host = host
         self.retry_max = retry_max
         self.retry_wait = retry_wait
+        self.retry_range = retry_range
 
         self._session = requests.Session()
         self._session.headers = {"accept": "application/json"}

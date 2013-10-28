@@ -13,6 +13,7 @@ username = $CLOUDBENCH_USERNAME
 apikey = $CLOUDBENCH_API_KEY
 retry_max = $CLOUDBENCH_RETRY_MAX
 retry_wait = $CLOUDBENCH_RETRY_WAIT
+retry_range = $CLOUDBENCH_RETRY_RANGE
 
 [benchmarks]
 blocksizes = $CLOUDBENCH_BLOCK_SIZES

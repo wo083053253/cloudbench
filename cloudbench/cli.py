@@ -37,6 +37,7 @@ DEFAULT_DURATION = "600"
 
 DEFAULT_RETRY_MAX = 0
 DEFAULT_RETRY_WAIT = 0
+DEFAULT_RETRY_RANGE = 0
 
 
 
@@ -224,6 +225,7 @@ def main():
         "duration": DEFAULT_DURATION,
         "retry_max": DEFAULT_RETRY_MAX,
         "retry_wait": DEFAULT_RETRY_WAIT,
+        "retry_range": DEFAULT_RETRY_RANGE,
     })
     config.add_section("environment")
     config.add_section("general")
@@ -251,6 +253,7 @@ def main():
     # Those two may fail, but that's fine: we haven't daemonized yet.
     reporting_retry_max = int(config.get("reporting", "retry_max"))
     reporting_retry_wait = int(config.get("reporting", "retry_wait"))
+    reporting_retry_range = int(config.get("reporting", "retry_range"))
 
 
     logger.info("Cloudbench v{0}: starting".format(__version__))
@@ -261,7 +264,7 @@ def main():
             benchmark_volumes = identify_benchmark_volumes(cloud, no_bench)
 
             api = Client(reporting_endpoint, APIKeyAuth(reporting_username, reporting_key),
-                         reporting_retry_max, reporting_retry_wait)
+                         reporting_retry_max, reporting_retry_wait, reporting_retry_range)
 
             logger.info("Provider: %s", cloud.provider)
             logger.info("Location: %s", cloud.location)

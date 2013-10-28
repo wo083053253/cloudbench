@@ -6,10 +6,10 @@ from requests import Response
 
 from cloudbench.api.client import Client
 from cloudbench.api.exceptions import APIError
+
 from cloudbench.test.api import MockTimeSleep
 from cloudbench.test.api.test_create import OBJ_RESPONSE
 from cloudbench.test.api.test_get import BASE_RESPONSE, OBJ_1_PARTIAL
-
 from cloudbench.test.utils import TEST_ENDPOINT, RepeatingTestAdapter, PredictableTestAdapter, make_json_response
 
 
@@ -75,6 +75,31 @@ class ErrorTestCase(unittest.TestCase):
             self.assertRaises(APIError, client.measurements.list)
 
         self.assertEqual([retry_wait, retry_wait], mock_sleep.calls)
+
+    def test_random_retry(self):
+        retry_max = 50  # We want a large sample
+        retry_wait = 100
+        retry_range = 5
+
+        client = Client(TEST_ENDPOINT, retry_max=retry_max, retry_wait=retry_wait, retry_range=retry_range)
+        err_response = Response()
+        err_response.status_code = 500
+        err_response.reason = "INTERNAL SERVER ERROR"
+
+        adapter = RepeatingTestAdapter(err_response)
+        client._session.mount(TEST_ENDPOINT, adapter)
+
+        mock_sleep = MockTimeSleep()
+
+        with mock_sleep:
+            self.assertRaises(APIError, client.measurements.list)
+
+        for wait_time in mock_sleep.calls:
+            self.assertGreaterEqual(wait_time, retry_wait - retry_range)
+            self.assertLessEqual(wait_time, retry_wait + retry_range)
+
+        self.assertFalse(all([wait_time == retry_wait for wait_time in mock_sleep.calls]))
+
 
     def test_race_condition(self):
         self.client = Client(TEST_ENDPOINT)  # We'll never hit that anyway
