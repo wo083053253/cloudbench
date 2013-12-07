@@ -30,9 +30,9 @@ def api_wrapper(method):
                 return method(self, *args, **kwargs)
             except (requests.HTTPError, requests.Timeout, requests.ConnectionError) as e:
                 response = None
+                logger.exception("An API call failed")
                 if hasattr(e, "response"):
                     response = e.response
-                    logger.error("An API call failed")
                     logger.error("%s %s", response.status_code, response.reason)
                     logger.error(e.response.text)
 
