@@ -106,7 +106,7 @@ def identify_benchmark_volumes(cloud, nobench):
     return acceptable_volumes
 
 
-def create_api_assets(cloud, api_client, benchmark_volumes):
+def create_api_assets(cloud, api_client, benchmark_volumes, extra_assets):
     """
     Create our API assets, and return a list of PhysicalAsset, Quantity
     """
@@ -122,6 +122,11 @@ def create_api_assets(cloud, api_client, benchmark_volumes):
             abstract_asset = api_client.abstract_assets.get_or_create(name=asset)
             physical_asset = api_client.physical_assets.get_or_create(asset=abstract_asset, location=location)
             assets.append(physical_asset)
+
+    for asset in extra_assets:
+        abstract_asset = api_client.abstract_assets.get_or_create(name=asset)
+        physical_asset = api_client.physical_assets.get_or_create(asset=abstract_asset, location=location)
+        assets.append(physical_asset)
 
     frozen_assets = [freeze_dict(asset) for asset in assets]
     assets_with_count = collections.Counter(frozen_assets).most_common()
@@ -179,10 +184,10 @@ def run_benchmarks(api_client, assets, base_job, fio_bin, block_sizes, depths, m
         report_benchmark(api_client, assets, configuration, job_report)
 
 
-def start_benchmark(cloud, api_client, benchmark_volumes, fio_bin,  block_sizes, depths, modes, size, ramp, duration):
+def start_benchmark(cloud, api_client, benchmark_volumes, extra_assets, fio_bin,  block_sizes, depths, modes, size, ramp, duration):
     # Create references in the API
     logger.debug("Creating API assets")
-    assets = create_api_assets(cloud, api_client, benchmark_volumes)
+    assets = create_api_assets(cloud, api_client, benchmark_volumes, extra_assets)
 
     for asset in assets:
         logger.info("Found asset: %s", asset)
@@ -226,6 +231,7 @@ def main():
         "retry_max": DEFAULT_RETRY_MAX,
         "retry_wait": DEFAULT_RETRY_WAIT,
         "retry_range": DEFAULT_RETRY_RANGE,
+        "extra_assets": "",
     })
     config.add_section("environment")
     config.add_section("general")
@@ -235,6 +241,7 @@ def main():
     pid_file = config.get("environment", "pidfile")
     log_file = config.get("environment", "logfile")
     no_bench = _cnf_get_list(config, "environment", "nobench")
+    extra_assets = _cnf_get_list(config, "environment", "extra_assets")
 
     files_preserve = setup_logging(log_file)
 
@@ -274,7 +281,7 @@ def main():
                 logger.info("%s: %s, %s", benchmark_volume.device, benchmark_volume.provider, "Persistent"
                             if benchmark_volume.persistent else "Ephemeral")
 
-            start_benchmark(cloud, api, benchmark_volumes, fio_bin, block_sizes, depths, modes, size, ramp, duration)
+            start_benchmark(cloud, api, benchmark_volumes, extra_assets, fio_bin, block_sizes, depths, modes, size, ramp, duration)
         except Exception as e:
             logger.critical("An error occurred: %s", e)
             response = getattr(e, "response", None)
