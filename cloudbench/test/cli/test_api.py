@@ -16,11 +16,13 @@ class CLIAPITestCase(unittest.TestCase):
         vol2 = TestVolume("/dev/sdd", True, "TestDisk", 20)
         benchmark_volumes = [vol1, vol2]
 
+        extra_assets = ["test-asset"]
+
         cloud = TestCloud("Cloud", "m1.test", "loc/1", "loc", benchmark_volumes)
 
         api_client = TestAPIClient()
 
-        assets = create_api_assets(cloud, api_client, benchmark_volumes)
+        assets = create_api_assets(cloud, api_client, benchmark_volumes, extra_assets)
 
         self.assertEqual(1, len(api_client.providers.objects))
         provider = list(api_client.providers.objects.values())[0]
@@ -29,21 +31,21 @@ class CLIAPITestCase(unittest.TestCase):
         location = list(api_client.locations.objects.values())[0]
         self.assertEqual(provider, location["provider"])
 
-        self.assertEqual(4, len(api_client.abstract_assets.objects))  # Instance, Disk, Size 1, Size 2
+        self.assertEqual(5, len(api_client.abstract_assets.objects))  # Instance, Disk, Size 1, Size 2, Extra
 
 
         found_assets = set()
         for abstract_asset in api_client.abstract_assets.objects.values():
             found_assets.add(abstract_asset["name"])
 
-        self.assertEqual(set(("TestDisk", "m1.test", "15 GB", "20 GB")), found_assets)
+        self.assertEqual(set(("TestDisk", "m1.test", "15 GB", "20 GB", "test-asset")), found_assets)
 
-        self.assertEqual(4, len(api_client.physical_assets.objects))
+        self.assertEqual(5, len(api_client.physical_assets.objects))
         for physical_asset in api_client.physical_assets.objects.values():
             self.assertIn(physical_asset["asset"], api_client.abstract_assets.objects.values())
 
-        self.assertEqual(4, len(assets))
-        expected = {"TestDisk": 2, "m1.test": 1, "15 GB": 1, "20 GB": 1}
+        self.assertEqual(5, len(assets))
+        expected = {"TestDisk": 2, "m1.test": 1, "15 GB": 1, "20 GB": 1, "test-asset": 1}
         for physical_asset, quantity in assets:
             expected_quantity = expected[physical_asset["asset"]["name"]]
             self.assertEqual(expected_quantity, quantity)
