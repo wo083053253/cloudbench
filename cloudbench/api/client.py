@@ -31,10 +31,13 @@ def api_wrapper(method):
             except (requests.HTTPError, requests.Timeout, requests.ConnectionError) as e:
                 response = None
                 logger.exception("An API call failed")
-                if hasattr(e, "response"):
-                    response = e.response
-                    logger.error("%s %s", response.status_code, response.reason)
+
+                try:
+                    logger.error("%s %s", e.response.status_code, e.response.reason)
                     logger.error(e.response.text)
+                except AttributeError:
+                    # Exception has no response attribute, discard
+                    pass
 
                 if n_failures >= self.retry_max:
                     raise APIError(response)
