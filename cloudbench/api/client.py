@@ -33,6 +33,7 @@ def api_wrapper(method):
                 logger.exception("An API call failed")
 
                 try:
+                    response = e.response
                     logger.error("%s %s", e.response.status_code, e.response.reason)
                     logger.error(e.response.text)
                 except AttributeError:
